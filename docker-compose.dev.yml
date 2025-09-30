@@ -15,6 +15,11 @@ services:
       - PORT=3000
       - VITE_PORT=1100
       - WAAKU_RUNTIME=linux
+      # Frontend uses origin by default; optionally set explicit base URL
+      - VITE_API_BASE_URL=http://localhost:3000
+      # API key config (client uses raw UUID4, server uses SHA-512 hash)
+      # - VITE_API_KEY=${VITE_API_KEY}
+      # - WAAKU_API_KEY=${WAAKU_API_KEY}
     env_file:
       - .env.development
     volumes:

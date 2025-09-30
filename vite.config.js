@@ -5,7 +5,7 @@ import path from 'path'
 export default defineConfig({
 	plugins: [vue()],
 	server: {
-		port: 1100,
+		port: Number(process.env.VITE_PORT) || 1100,
 		host: true,
 		cors: true
 	},

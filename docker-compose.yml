@@ -10,6 +10,10 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - WAAKU_RUNTIME=linux
+      # API key configuration (server expects SHA-512 hash)
+      # Set WAAKU_API_KEY to sha512(raw_uuid_key_without_dashes)
+      # e.g., WAAKU_API_KEY=ab12... (128 hex chars)
+      # - WAAKU_API_KEY=${WAAKU_API_KEY}
       - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
       - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
     volumes:

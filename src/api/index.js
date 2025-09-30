@@ -1,5 +1,6 @@
 require('dotenv').config()
 const express = require('express')
+const http = require('http')
 const path = require('path')
 const bodyParser = require('body-parser')
 const cors = require('cors')
@@ -7,8 +8,10 @@ const swaggerUi = require('swagger-ui-express')
 const swaggerSpecs = require('./swagger')
 const sessionRoutes = require('./routes/session')
 const { validateApiKey, logApiAccess, rateLimiter, generateApiKey } = require('./middleware/auth')
+const { initSocketIO } = require('./socket')
 
 const app = express()
+const server = http.createServer(app)
 app.use(cors())
 app.use(bodyParser.json())
 
@@ -135,5 +138,9 @@ app.get('*', (req, res) => {
 	}
 })
 
+// Initialize Socket.IO and export via socket singleton
+const io = initSocketIO(server)
+module.exports.io = io
+
 const port = process.env.PORT || 3000
-app.listen(port, () => console.log(`Server running at http://localhost:${port}`))
+server.listen(port, () => console.log(`Server running at http://localhost:${port}`))

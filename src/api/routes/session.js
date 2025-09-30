@@ -1,14 +1,17 @@
 const express = require('express')
 const QRCode = require('qrcode')
-const { createSession, listSessions, getSession, getSessionHealth, getAllSessionsHealth } = require('../whatsapp/session')
+const { createSession, listSessions, getSession, getSessionHealth, getAllSessionsHealth, deleteSession: removeSession } = require('../whatsapp/session')
 
 const router = express.Router()
+const { getIO } = require('../socket')
 
 // Create new session
 router.post('/', (req, res) => {
 	const { id } = req.body
 	if (!id) return res.status(400).json({ error: 'id required' })
 	createSession(id)
+	const io = getIO()
+	if (io) io.emit('sessions:update', listSessions())
 	res.json({ success: true, id })
 })
 
@@ -156,11 +159,28 @@ router.post('/:id/restart', async (req, res) => {
 			sessionId: req.params.id,
 			timestamp: new Date()
 		})
+		const io = getIO()
+		if (io) io.emit('sessions:update', listSessions())
 	} catch (err) {
 		res.status(500).json({
 			error: err.message,
 			timestamp: new Date()
 		})
+	}
+})
+
+// Delete a session
+router.delete('/:id', async (req, res) => {
+	try {
+		const id = req.params.id
+		const session = getSession(id)
+		if (!session) {
+			return res.status(404).json({ error: 'Session not found' })
+		}
+		await removeSession(id)
+		res.json({ success: true, id })
+	} catch (err) {
+		res.status(500).json({ error: err.message })
 	}
 })
 

@@ -125,9 +125,6 @@
 						</svg>
 						Active Sessions ({{ sessions.length }})
 					</h2>
-					<div class="text-sm text-gray-500">
-						Auto-refresh every 15s
-					</div>
 				</div>
 
 				<!-- Empty State -->
@@ -228,7 +225,7 @@
 					</div>
 
 					<!-- Message Sending Section -->
-					<div v-if="s.ready" class="p-6 bg-gradient-to-r from-green-50 to-blue-50">
+					<div v-if="false" class="p-6 bg-gradient-to-r from-green-50 to-blue-50">
 						<div class="mb-4">
 							<h4 class="text-lg font-semibold text-gray-900 mb-2 flex items-center">
 								<svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -345,6 +342,7 @@
 import { ref, onMounted } from 'vue'
 import api, { getErrorMessage, isNetworkError } from './lib/api.js'
 import CreateSessionModal from './components/CreateSessionModal.vue'
+import { connectSocket, on as onSocket, off as offSocket } from './lib/socket.js'
 
 // State
 const sessions = ref([])
@@ -591,9 +589,39 @@ async function fetchAllData() {
 onMounted(() => {
 	fetchAllData()
 
-	// Auto refresh every 15 seconds
-	setInterval(() => {
-		fetchAllData()
-	}, 15000)
+	// Connect socket and subscribe to real-time updates
+	connectSocket()
+
+	const updateSessions = (list) => {
+		sessions.value = list
+	}
+	const onSessionUpdate = (list) => updateSessions(list)
+	const onSessionReady = () => fetchAllData()
+	const onSessionError = () => fetchAllData()
+	const onQR = ({ id, qr: qrStr }) => {
+		if (qrStr) qr.value[id] = qrStr
+	}
+
+	const onHealthUpdate = (payload) => {
+		healthData.value = payload
+	}
+
+	onSocket('sessions:update', onSessionUpdate)
+	onSocket('session:ready', onSessionReady)
+	onSocket('session:error', onSessionError)
+	onSocket('session:qr', onQR)
+	onSocket('health:update', onHealthUpdate)
+
+	// Cleanup on destroy
+	const cleanup = () => {
+		offSocket('sessions:update', onSessionUpdate)
+		offSocket('session:ready', onSessionReady)
+		offSocket('session:error', onSessionError)
+		offSocket('session:qr', onQR)
+		offSocket('health:update', onHealthUpdate)
+	}
+	if (import.meta.hot) {
+		import.meta.hot.dispose(cleanup)
+	}
 })
 </script>
