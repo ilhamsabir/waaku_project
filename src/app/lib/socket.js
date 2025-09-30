@@ -5,7 +5,9 @@ let socket
 export function connectSocket() {
   if (socket && socket.connected) return socket
 
-  const baseURL = import.meta.env.VITE_API_BASE_URL || window.location.origin
+  // In dev with Vite proxy, prefer window origin to avoid cross-origin socket conflicts
+  const isDev = import.meta.env.DEV
+  const baseURL = (isDev ? window.location.origin : import.meta.env.VITE_API_BASE_URL) || window.location.origin
   const token = import.meta.env.VITE_API_KEY
 
   socket = io(baseURL, {

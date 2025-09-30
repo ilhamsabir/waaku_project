@@ -158,7 +158,7 @@ Admin helper: POST /admin/generate-api-key returns a client key + server hash (r
 
 ## Troubleshooting
 
-- EADDRINUSE on 3000: run `npm run dev` (predev kills stale process) or `npm run port:kill:3000`
+- EADDRINUSE on 3000: set a different port and rerun, e.g. `npm run dev:3001` or set `PORT`/`VITE_API_DEV_PORT` in `.env`
 - Socket connect_error: ensure VITE_API_KEY (raw UUID) matches WAAKU_API_KEY (sha512) server hash
 - Chromium/puppeteer issues in Docker: container uses chromium with stability flags and larger shm; see Dockerfile
 - Message send “Evaluation failed”: ensure number is in intl format (e.g., 62...) and exists; route resolves chatId with `getNumberId`

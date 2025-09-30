@@ -188,7 +188,7 @@
 				</div>
 
 				<!-- Session Cards -->
-				<div v-for="s in sessions" :key="s.id" class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01]">
+				<div v-for="s in sessions" :key="s.id" class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-300 transform">
 					<!-- Session Header -->
 					<div class="p-6 border-b border-gray-100">
 						<div class="flex items-center justify-between">
@@ -242,16 +242,25 @@
 								<p class="text-gray-600">Scan the QR code with your WhatsApp mobile app</p>
 							</div>
 
-							<button
-								v-if="!qr[s.id]"
-								@click="loadQr(s.id)"
-								class="mb-4 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg"
-							>
-								<svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
-								</svg>
-								Generate QR Code
-							</button>
+							<div class="flex justify-center mb-4">
+								<button
+									v-if="!qr[s.id]"
+									@click="loadQr(s.id)"
+									:disabled="qrLoading[s.id]"
+									:aria-busy="qrLoading[s.id] ? 'true' : 'false'"
+									:aria-disabled="qrLoading[s.id] ? 'true' : 'false'"
+									class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed disabled:pointer-events-none text-white font-semibold rounded-xl transition-all duration-200 transform disabled:scale-100 shadow-lg flex items-center justify-center"
+								>
+									<svg v-if="!qrLoading[s.id]" class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+									</svg>
+									<svg v-else class="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+										<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+										<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+									</svg>
+									<span>{{ qrLoading[s.id] ? 'Generating...' : 'Generate QR Code' }}</span>
+								</button>
+							</div>
 
 							<div v-if="qr[s.id]" class="inline-block">
 								<div class="bg-white p-4 rounded-2xl shadow-lg border-2 border-gray-200">
@@ -380,14 +389,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import api, { getErrorMessage, isNetworkError } from './lib/api.js'
 import CreateSessionModal from './components/CreateSessionModal.vue'
 import { connectSocket, on as onSocket, off as offSocket } from './lib/socket.js'
 
 // State
 const sessions = ref([])
-const qr = ref({})
+const qr = reactive({})
+const qrLoading = reactive({})
 const msgTo = ref('')
 const msgText = ref('')
 const validationResult = ref(null)
@@ -486,7 +496,9 @@ function initAfterAuth() {
 	const onSessionReady = () => fetchAllData()
 	const onSessionError = () => fetchAllData()
 	const onQR = ({ id, qr: qrStr }) => {
-		if (qrStr) qr.value[id] = qrStr
+		if (qrStr) qr[id] = qrStr
+		// stop loader for this session once QR arrives
+		if (id) qrLoading[id] = false
 	}
 	const onHealthUpdate = (payload) => {
 		healthData.value = payload
@@ -590,11 +602,16 @@ async function addSession(sessionName) {
 
 
 async function loadQr(id) {
+	// guard: if already loading or QR already present, do nothing
+	if (qrLoading[id] || qr[id]) return
+
+	// set per-session loading to prevent repeated clicks
+	qrLoading[id] = true
 	showLoading('Generating QR code...')
 	try {
 		const data = await api.generateQRCode(id)
 		if (data.qr) {
-			qr.value[id] = data.qr
+			qr[id] = data.qr
 			showNotification('QR code generated successfully!')
 		}
 	} catch (err) {
@@ -602,6 +619,7 @@ async function loadQr(id) {
 		showNotification(`Failed to generate QR code: ${errorMessage}`, 'error')
 	} finally {
 		hideLoading()
+		qrLoading[id] = false
 	}
 }
 
@@ -690,7 +708,7 @@ async function deleteSession(id) {
 	showLoading('Deleting session...')
 	try {
 		await api.deleteSession(id)
-		delete qr.value[id]
+		delete qr[id]
 		showNotification(`Session "${id}" deleted successfully!`)
 		await fetchAllData()
 	} catch (err) {
@@ -704,9 +722,9 @@ async function deleteSession(id) {
 // Optimized function to fetch both sessions and health data
 async function fetchAllData() {
 	try {
-		const { sessions: sessionsData, health: healthData } = await api.getSessionsWithHealth()
+		const { sessions: sessionsData, health: healthPayload } = await api.getSessionsWithHealth()
 		sessions.value = sessionsData
-		healthData.value = healthData
+		healthData.value = healthPayload
 	} catch (err) {
 		// Fallback to individual calls if batch fails
 		console.warn('Batch fetch failed, falling back to individual calls:', err)

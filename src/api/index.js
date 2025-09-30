@@ -2,8 +2,9 @@ require('dotenv').config()
 const express = require('express')
 const http = require('http')
 const path = require('path')
-const bodyParser = require('body-parser')
 const cors = require('cors')
+const helmet = require('helmet')
+const compression = require('compression')
 const swaggerUi = require('swagger-ui-express')
 const swaggerSpecs = require('./swagger')
 const sessionRoutes = require('./routes/session')
@@ -12,8 +13,19 @@ const { initSocketIO } = require('./socket')
 
 const app = express()
 const server = http.createServer(app)
-app.use(cors())
-app.use(bodyParser.json())
+
+// Security and performance middleware
+app.use(helmet({
+	crossOriginResourcePolicy: { policy: 'cross-origin' }
+}))
+
+// Configurable CORS (comma-separated origins in CORS_ORIGINS), defaults to allow all
+const corsOrigins = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',').map(s => s.trim()) : '*'
+const corsOptions = corsOrigins === '*' ? {} : { origin: corsOrigins, credentials: true }
+app.use(cors(corsOptions))
+
+app.use(express.json({ limit: '1mb' }))
+app.use(compression())
 
 // Security middleware
 app.use(logApiAccess)
@@ -96,7 +108,7 @@ const distIndexPath = path.join(distPath, 'index.html')
 
 // Serve frontend build (dist) - but only for non-API routes
 if (fs.existsSync(distPath)) {
-	app.use(express.static(distPath))
+	app.use(express.static(distPath, { maxAge: '1y', etag: true, immutable: true }))
 } else {
 	console.warn('⚠️  Dist folder not found. Running in API-only mode.')
 	console.warn('💡 Run "npm run build" to generate frontend assets.')
@@ -142,5 +154,14 @@ app.get('*', (req, res) => {
 const io = initSocketIO(server)
 module.exports.io = io
 
-const port = process.env.PORT || 3000
+const port = Number(process.env.VITE_API_DEV_PORT || 3000)
 server.listen(port, () => console.log(`Server running at http://localhost:${port}`))
+
+server.on('error', (err) => {
+	if (err && err.code === 'EADDRINUSE') {
+		console.error(`\nPort ${port} is already in use.`)
+		console.error('Tips:')
+		console.error('- Stop the process using that port, or')
+		console.error('- Run: PORT=3001 VITE_API_DEV_PORT=3001 npm run dev (or use "npm run dev:3001")')
+	}
+})

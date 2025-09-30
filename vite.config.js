@@ -7,7 +7,33 @@ export default defineConfig({
 	server: {
 		port: Number(process.env.VITE_PORT) || 1100,
 		host: true,
-		cors: true
+		cors: true,
+		proxy: {
+				// Use configurable API port for dev to avoid port conflicts
+				// Set VITE_API_DEV_PORT in .env (defaults to 3000)
+				...( (() => {
+				const apiPort = Number(process.env.VITE_API_DEV_PORT) || 3000;
+				const socketPort = Number(process.env.VITE_SOCKET_PORT) || apiPort;
+				return {
+				'/api': {
+					target: `http://localhost:${apiPort}`,
+					changeOrigin: true,
+					ws: true,
+				},
+				'/health': {
+					target: `http://localhost:${apiPort}`,
+					changeOrigin: true,
+				},
+				'/api-docs': {
+					target: `http://localhost:${apiPort}`,
+					changeOrigin: true,
+				},
+				'/socket.io': {
+					target: `http://localhost:${socketPort}`,
+					ws: true,
+				},
+			} })() )
+		}
 	},
 	build: {
 		outDir: path.resolve(__dirname, 'dist'),
