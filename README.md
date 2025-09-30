@@ -1,404 +1,181 @@
-# WhatsApp Multi-Session Manager
+<div align="center">
 
-Aplikasi web untuk mengelola multiple session WhatsApp menggunakan Vue.js dan Express.js dengan whatsapp-web.js.
+# Waaku — WhatsApp Multi‑Session Manager
 
-## 🚀 Fitur
+Manage multiple WhatsApp sessions with a modern Vue 3 UI, secure Express API, real‑time updates via Socket.IO, and production‑ready Docker support.
 
-- ✅ Mengelola multiple session WhatsApp
-- ✅ Generate QR Code untuk autentikasi
-- ✅ Validasi nomor WhatsApp
-- ✅ Kirim pesan ke nomor yang valid
-- ✅ Interface web yang responsive dengan Tailwind CSS
-- ✅ Docker support untuk deployment mudah
+</div>
 
-## 🛠️ Tech Stack
+## Highlights
 
-- **Frontend**: Vue.js 3, Tailwind CSS, Vite
-- **Backend**: Node.js, Express.js, whatsapp-web.js
-- **Containerization**: Docker, Docker Compose
+- Multi‑session WhatsApp management (whatsapp-web.js)
+- QR login flow, live status, health dashboard
+- Real‑time UI (Socket.IO) — no polling
+- Secure API with X‑API‑Key (UUIDv4 raw on client, SHA‑512 hash on server)
+- Frontend UI login (env-based) for dashboard access
+- Docker and docker‑compose for dev and prod
 
-## 📋 Prerequisites
+## Stack
 
-Pastikan Anda telah menginstall:
+- Frontend: Vue 3, Vite, Tailwind CSS, Socket.IO client
+- Backend: Node.js/Express, whatsapp-web.js, Socket.IO, Swagger
+- Containerization: Docker (Node 18 alpine + Chromium), docker-compose
 
-- [Docker](https://docs.docker.com/get-docker/)
-- [Docker Compose](https://docs.docker.com/compose/install/)
+## Repository structure
 
-## 🚀 Quick Start
+```
+src/
+  api/
+    index.js            # Express bootstrap, Swagger, middleware, Socket.IO init
+    middleware/auth.js  # X-API-Key (UUID4 + SHA-512), rate limiting, logging
+    routes/session.js   # Sessions, QR, validate, send, health, restart, delete
+    socket.js           # Socket.IO server with API-key auth (handshake)
+    whatsapp/session.js # WhatsApp client lifecycle + socket emits
+  app/
+    App.vue             # Main Vue app (now with env-based login)
+    main.js, index.css, components/
+    lib/http.js         # Axios with X-API-Key header
+    lib/api.js          # API wrapper
+    lib/socket.js       # Socket.IO client
+Dockerfile, Dockerfile.dev
+docker-compose.yml, docker-compose.dev.yml
+vite.config.js, tailwind.config.js
+```
 
-### 1. Clone Repository
+## Prerequisites
+
+- Node.js 18+ (for local runs)
+- Docker + docker‑compose (optional but recommended)
+
+## Quick start (local)
+
+1) Copy env and configure
 
 ```bash
-git clone <repository-url>
-cd waaku
+cp .env.example .env
 ```
 
-### 2. Jalankan dengan Docker Compose
+Set these variables (see .env.example for all):
 
-#### Production Mode
+- VITE_API_BASE_URL=http://localhost:3000 (or omit to use window origin)
+- VITE_API_KEY=<raw UUIDv4 without dashes>
+- WAAKU_API_KEY=<sha512 hash of the raw key>
+- VITE_AUTH_USER=<dashboard user>
+- VITE_AUTH_PASS=<dashboard pass>
+
+Generate values:
+
+- Raw UUID (client): any v4 without dashes (e.g. `uuidgen | tr -d '-'` on macOS)
+- Hash (server): `echo -n <raw> | shasum -a 512 | awk '{print $1}'`
+
+2) Install and run
 
 ```bash
-# Build dan jalankan aplikasi
-docker-compose up -d
-
-# Atau build ulang jika ada perubahan
-docker-compose up --build -d
+npm install
+npm run dev
 ```
 
-Aplikasi akan tersedia di:
-- **Web Interface**: `http://localhost:3000`
-- **API Documentation**: `http://localhost:3000/api-docs`
-- **Health Check**: `http://localhost:3000/health`
+What it does:
 
-#### Development Mode
+- Frees port 3000 if busy (predev hook)
+- Starts Vite (default 1100, respects VITE_PORT)
+- Starts Express API on 3000 with Socket.IO
+
+Open:
+
+- App: http://localhost:1100 (or whichever Vite chooses)
+- API: http://localhost:3000
+- Swagger: http://localhost:3000/api-docs
+
+Login to the dashboard with VITE_AUTH_USER/PASS. The UI uses X‑API‑Key automatically via Axios.
+
+## Quick start (Docker)
+
+Production‑like:
 
 ```bash
-# Jalankan dalam mode development
-docker-compose -f docker-compose.dev.yml up -d
-
-# Lihat logs
-docker-compose -f docker-compose.dev.yml logs -f
+docker compose up --build -d
 ```
 
-Development server akan tersedia di:
-- **Backend API**: `http://localhost:3000`
-- **Frontend (Vite HMR)**: `http://localhost:1100`
-- **API Documentation**: `http://localhost:3000/api-docs`
+Open http://localhost:3000. Provide envs (WAAKU_API_KEY, optionally VITE vars) via compose or image environment.
 
-> **💡 Tips Development:**
-> - Frontend Vite server (port 1100) untuk hot reload dan fast refresh
-> - Backend API server (port 3000) untuk REST API endpoints
-> - Vite secara otomatis akan proxy API calls ke backend server
-
-### 3. Dengan Nginx (Opsional)
-
-Jika Anda ingin menggunakan Nginx sebagai reverse proxy:
+Development:
 
 ```bash
-# Jalankan dengan nginx
-docker-compose --profile with-nginx up -d
+docker compose -f docker-compose.dev.yml up --build
 ```
 
-## 📁 Struktur Project
-
-```
-waaku/
-├── src/
-│   ├── api/                 # Backend API
-│   │   ├── index.js        # Express server
-│   │   ├── routes/
-│   │   │   └── session.js  # Session routes
-│   │   └── whatsapp/
-│   │       └── session.js  # WhatsApp session manager
-│   └── app/                # Frontend Vue.js
-│       ├── App.vue         # Main component
-│       ├── main.js         # Vue app entry
-│       └── index.css       # Tailwind styles
-├── nginx/                  # Nginx configuration
-├── docker-compose.yml      # Production compose
-├── docker-compose.dev.yml  # Development compose
-├── Dockerfile             # Production image
-├── Dockerfile.dev         # Development image
-└── package.json           # Dependencies
-```
+- API: http://localhost:3000
+- Vite: http://localhost:1100 (respects VITE_PORT)
 
-## 🔧 Konfigurasi
+## Security model (API)
 
-### Environment Variables
+- Client sends X‑API‑Key with raw UUIDv4 (32 hex chars, no dashes)
+- Server stores only SHA‑512 of the key (WAAKU_API_KEY)
+- On each request (and socket handshake), server sha512(raw) and compares with stored hash using timing‑safe comparison
+- Rate limiting and access logging included
 
-Buat file `.env` di root directory (opsional):
+Admin helper: POST /admin/generate-api-key returns a client key + server hash (requires a valid existing key).
 
-```env
-NODE_ENV=production
-PORT=3000
-```
+## Realtime events (Socket.IO)
 
-### Port Configuration
+- Auth: handshake includes `{ auth: { token: <raw uuid> } }` (or X-API-Key header)
+- Emitted by server:
+  - `sessions:update` — array of sessions
+  - `session:qr` — `{ id, qr }` (data URL)
+  - `session:ready` — `{ id }`
+  - `session:error` — `{ id, error }`
+  - `health:update` — full health summary
 
-#### Production Mode
-- **Main Application**: Port 3000
-- **Nginx (optional)**: Port 80/443
+## API overview
 
-#### Development Mode
-- **Backend API**: Port 3000
-- **Frontend Vite**: Port 1100 (configurable di `vite.config.js`)
+- GET  /health — service health
+- GET  /api-docs — Swagger UI
+- POST /admin/generate-api-key — generate new key pair
+- Sessions
+  - GET    /api/sessions
+  - POST   /api/sessions { id }
+  - GET    /api/sessions/:id/qr
+  - POST   /api/sessions/:id/validate { to }
+  - POST   /api/sessions/:id/send { to, message }
+  - GET    /api/sessions/health
+  - GET    /api/sessions/:id/health
+  - POST   /api/sessions/:id/restart
+  - DELETE /api/sessions/:id
 
-Untuk mengubah port Vite development server:
+## Troubleshooting
 
-```javascript
-// vite.config.js
-export default defineConfig({
-  server: {
-    port: 1100,  // Ubah ke port yang diinginkan
-    host: true,
-    cors: true
-  }
-})
-```
+- EADDRINUSE on 3000: run `npm run dev` (predev kills stale process) or `npm run port:kill:3000`
+- Socket connect_error: ensure VITE_API_KEY (raw UUID) matches WAAKU_API_KEY (sha512) server hash
+- Chromium/puppeteer issues in Docker: container uses chromium with stability flags and larger shm; see Dockerfile
+- Message send “Evaluation failed”: ensure number is in intl format (e.g., 62...) and exists; route resolves chatId with `getNumberId`
 
-### Docker Volumes
+## Contributing
 
-Aplikasi menggunakan named volume untuk menyimpan data session WhatsApp:
+PRs welcome! Suggested flow:
 
-- `whatsapp_sessions`: Menyimpan data autentikasi WhatsApp
-- `./logs`: Mount logs (opsional)
+1. Fork and create a feature branch
+2. Keep changes focused; add/update docs and small tests where possible
+3. Follow existing code style and structure
+4. Open a PR with a concise summary and screenshots/logs when relevant
 
-## 🖥️ Penggunaan
+Areas to improve:
 
-### 1. Tambah Session Baru
-- Masukkan Session ID di form "Add Session"
-- Klik tombol "Add" untuk membuat session baru
+- Add automated tests (unit/integration)
+- Improve session lifecycle UX and metrics
+- Pluggable auth providers for the UI login
+- External rate‑limit store (Redis) for multi‑instance prod
 
-### 2. Scan QR Code
-- Jika session belum ready, klik "Show QR"
-- Scan QR code dengan WhatsApp di HP Anda
-- Status akan berubah menjadi "Ready" setelah berhasil
+## License
 
-### 3. Kirim Pesan
-- Masukkan nomor tujuan (format: 62xxx)
-- Tulis pesan yang ingin dikirim
-- Klik "Validate" untuk memastikan nomor valid
-- Klik "Send" untuk mengirim pesan
+MIT License. See LICENSE file if present; otherwise, contributions are assumed MIT under this repository.
 
-## 🐳 Docker Commands
+## Support
 
-### Management Commands
+If this project helps you, consider buying me a coffee:
 
-```bash
-# Lihat status container
-docker-compose ps
+<a href="https://buymeacoffee.com/ilhamsabir" target="_blank" rel="noopener noreferrer"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" height="41" width="174"></a>
 
-# Lihat logs
-docker-compose logs -f whatsapp-app
-
-# Restart aplikasi
-docker-compose restart
-
-# Stop aplikasi
-docker-compose down
-
-# Stop dan hapus volumes
-docker-compose down -v
-
-# Build ulang image
-docker-compose build --no-cache
-```
-
-### Development Commands
-
-```bash
-# Jalankan development mode
-docker-compose -f docker-compose.dev.yml up -d
-
-# Lihat logs development
-docker-compose -f docker-compose.dev.yml logs -f
-
-# Masuk ke container untuk debugging
-docker-compose exec whatsapp-app-dev sh
-```
-
-## 🔍 Monitoring & Debugging
-
-### Health Check
-
-Aplikasi memiliki built-in health check yang dapat diakses di:
-```
-http://localhost:3000/health
-```
-
-### Logs
-
-```bash
-# Lihat semua logs
-docker-compose logs
-
-# Lihat logs real-time
-docker-compose logs -f
-
-# Lihat logs spesifik service
-docker-compose logs whatsapp-app
-```
-
-### Debugging
-
-Masuk ke container untuk debugging:
-
-```bash
-# Production container
-docker-compose exec whatsapp-app sh
-
-# Development container
-docker-compose -f docker-compose.dev.yml exec whatsapp-app-dev sh
-```
-
-## 🔒 Security Considerations
-
-### Production Deployment
-
-1. **Gunakan HTTPS**: Konfigurasikan SSL certificate di nginx
-2. **Environment Variables**: Simpan sensitive data di environment variables
-3. **Network Security**: Batasi akses port hanya yang diperlukan
-4. **Regular Updates**: Update base image dan dependencies secara berkala
-
-### SSL Configuration
-
-Untuk mengaktifkan HTTPS, uncomment konfigurasi SSL di `nginx/nginx.conf` dan tempatkan certificate di `nginx/ssl/`.
-
-## 📊 Performance
-
-### Resource Requirements
-
-- **Minimum**: 1 CPU, 1GB RAM
-- **Recommended**: 2 CPU, 2GB RAM untuk multiple sessions
-
-### Scaling
-
-Untuk menangani lebih banyak session, Anda dapat:
-
-1. Increase container resources:
-```bash
-docker-compose up --scale whatsapp-app=3
-```
-
-2. Use nginx load balancer untuk distribute load
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-#### 1. Frontend Build Error (ENOENT: dist/index.html)
-```bash
-# Build frontend assets
-npm run build
-
-# Or setup development environment
-./start.sh setup
-
-# For local development
-./start.sh local
-```
-
-**Penyebab:** Frontend belum di-build atau folder `dist` tidak ada.
-
-**Solusi:**
-- Jalankan `npm run build` untuk production build
-- Gunakan `npm run dev` untuk development dengan hot reload
-- Server akan menampilkan fallback page jika `dist` tidak ada
-
-#### 2. QR Code tidak muncul
-```bash
-# Check logs untuk error
-docker-compose logs whatsapp-app
-
-# Restart container
-docker-compose restart whatsapp-app
-```
-
-#### 2. Session tidak tersimpan
-```bash
-# Pastikan volume mounted dengan benar
-docker volume ls
-docker volume inspect waaku_whatsapp_sessions
-```
-
-#### 3. Chrome/Chromium issues
-```bash
-# Rebuild dengan no-cache
-docker-compose build --no-cache
-```
-
-#### 4. Port sudah digunakan
-```bash
-# Ubah port di docker-compose.yml
-ports:
-  - "3001:3000"  # Ganti 3000 ke port lain
-```
-
-### Debug Mode
-
-Untuk debugging lebih detail, set environment variable:
-
-```yaml
-# Tambah di docker-compose.yml
-environment:
-  - DEBUG=whatsapp-web.js:*
-  - NODE_ENV=development
-```
-
-## 🔄 Updates & Maintenance
-
-### Update Aplikasi
-
-```bash
-# Pull latest changes
-git pull
-
-# Rebuild dan restart
-docker-compose down
-docker-compose up --build -d
-```
-
-### Backup Session Data
-
-```bash
-# Backup volume
-docker run --rm -v waaku_whatsapp_sessions:/data -v $(pwd):/backup alpine tar czf /backup/sessions-backup.tar.gz -C /data .
-
-# Restore volume
-docker run --rm -v waaku_whatsapp_sessions:/data -v $(pwd):/backup alpine tar xzf /backup/sessions-backup.tar.gz -C /data
-```
-
-### Cleanup
-
-```bash
-# Hapus unused images
-docker image prune -a
-
-# Hapus unused volumes
-docker volume prune
-
-# Complete cleanup
-docker system prune -a --volumes
-```
-
-## � API Documentation
-
-Aplikasi ini dilengkapi dengan dokumentasi API interaktif menggunakan **Swagger/OpenAPI 3.0**.
-
-### 🔗 Akses Dokumentasi
-
-- **Swagger UI**: `http://localhost:3000/api-docs`
-- **API Info**: `http://localhost:3000/api-info`
-- **JSON Spec**: `http://localhost:3000/api-docs.json`
-
-### ✨ Fitur Dokumentasi
-
-- 📖 **Interactive API Explorer** - Test endpoints langsung dari browser
-- 📋 **Complete Schema Documentation** - Model dan response yang lengkap
-- 🔧 **Request/Response Examples** - Contoh payload untuk setiap endpoint
-- 🏷️ **Organized by Tags** - Endpoints dikelompokkan berdasarkan fungsi
-- 🔍 **Search & Filter** - Cari endpoints dengan mudah
-- 💾 **Export Options** - Download sebagai OpenAPI spec atau Postman collection
-- 📁 **Modular Documentation** - Dokumentasi terpisah per kategori untuk maintainability
-
-### 📂 Struktur Dokumentasi
-
-```
-src/api/docs/
-├── index.js      # Index untuk semua dokumentasi
-├── schemas.js    # Component schemas & responses
-├── general.js    # General endpoints (/health, /api)
-├── sessions.js   # Session management endpoints
-├── messages.js   # Message & validation endpoints
-└── health.js     # Health monitoring endpoints
-```
-
-### 📁 Postman Collection
-
-Import collection siap pakai: `postman/WhatsApp-Multi-Session-API.postman_collection.json`
-
-```bash
-# Variables untuk testing
 base_url: http://localhost:3000
 session_id: test-session
 phone_number: 6281234567890
