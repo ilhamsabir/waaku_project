@@ -586,10 +586,15 @@ async function addSession(sessionName) {
 
 	showLoading('Creating new session...')
 	try {
-		await api.createSession(sessionName.trim())
-
-		closeModal() // Close modal on success
+		const response =await api.createSession(sessionName.trim())
+		// On success, start QR loading state for this session
 		await fetchAllData()
+		if (response && response.success) {
+			qrLoading[sessionName] = true // Start QR loading state
+		} else {
+			qrLoading[sessionName] = false
+		}
+		closeModal() // Close modal on success
 		showNotification(`Session "${sessionName}" created successfully!`)
 	} catch (err) {
 		const errorMessage = getErrorMessage(err)
@@ -612,6 +617,7 @@ async function loadQr(id) {
 		const data = await api.generateQRCode(id)
 		if (data.qr) {
 			qr[id] = data.qr
+			qrLoading[id] = false
 			showNotification('QR code generated successfully!')
 		}
 	} catch (err) {
@@ -723,8 +729,21 @@ async function deleteSession(id) {
 async function fetchAllData() {
 	try {
 		const { sessions: sessionsData, health: healthPayload } = await api.getSessionsWithHealth()
+		console.log('sessionsData: ', sessionsData);
 		sessions.value = sessionsData
 		healthData.value = healthPayload
+
+		if (sessionsData.length > 0) {
+			sessionsData.forEach(element => {
+				// Clear all QR codes if no sessions exist
+				if (element.id && !element.ready) {
+					qrLoading[element.id] = true
+				} else {
+					qrLoading[element.id] = false
+				}
+			});
+		}
+
 	} catch (err) {
 		// Fallback to individual calls if batch fails
 		console.warn('Batch fetch failed, falling back to individual calls:', err)
