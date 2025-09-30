@@ -1,5 +1,49 @@
 const { Client, LocalAuth } = require('whatsapp-web.js')
 
+// Environment-aware Puppeteer runtime selection
+const RUNTIME = process.env.WAAKU_RUNTIME || 'linux' // 'linux' (default) | 'mac'
+const isLinux = RUNTIME === 'linux'
+const isMac = RUNTIME === 'mac'
+
+function buildPuppeteerOptions() {
+	const commonArgs = [
+		'--no-first-run',
+		'--no-default-browser-check',
+		'--disable-accelerated-2d-canvas',
+		'--disable-software-rasterizer',
+		'--window-size=1920,1080',
+	]
+
+	const linuxArgs = [
+		'--no-sandbox',
+		'--disable-setuid-sandbox',
+		'--disable-dev-shm-usage',
+		'--disable-gpu',
+		'--no-zygote',
+		'--user-data-dir=/tmp/chrome',
+		'--remote-debugging-port=9222',
+	]
+
+	const macArgs = [
+		'--disable-gpu',
+	]
+
+	const options = {
+		headless: true,
+		args: [...commonArgs, ...(isLinux ? linuxArgs : macArgs)],
+	}
+
+	// Only enforce executablePath on Linux (Docker). On mac, let puppeteer resolve its Chromium
+	if (isLinux) {
+		options.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser'
+	} else if (process.env.WAAKU_CHROME_PATH) {
+		options.executablePath = process.env.WAAKU_CHROME_PATH
+	}
+
+	console.log(`[PUPPETEER] Runtime=${RUNTIME} headless=${options.headless} exec=${options.executablePath || 'auto'}`)
+	return options
+}
+
 const sessions = {}
 
 function createSession(id) {
@@ -7,24 +51,7 @@ function createSession(id) {
 
 	const client = new Client({
 		authStrategy: new LocalAuth({ clientId: id }),
-		puppeteer: {
-			headless: true,
-			executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser',
-			args: [
-				'--no-sandbox',
-				'--disable-setuid-sandbox',
-				'--disable-dev-shm-usage',
-				'--disable-accelerated-2d-canvas',
-				'--disable-software-rasterizer',
-				'--no-first-run',
-				'--no-default-browser-check',
-				'--no-zygote',
-				'--disable-gpu',
-				'--window-size=1920,1080',
-				'--user-data-dir=/tmp/chrome',
-				'--remote-debugging-port=9222'
-			]
-		},
+		puppeteer: buildPuppeteerOptions(),
 	})
 
 	client.on('qr', (qr) => {
