@@ -1,16 +1,6 @@
 #!/bin/bash
 
-# Wh    echo "  start         Start the application in production mode"
-    echo "  dev           Start the application in development mode"
-    echo "  local         Start local development (without Docker)"
-    echo "  setup         Setup development environment"
-    echo "  stop          Stop the application"
-    echo "  restart       Restart the application"
-    echo "  logs          Show application logs"
-    echo "  build         Rebuild the application"
-    echo "  clean         Clean up containers and volumes"
-    echo "  backup        Backup session data"
-    echo "  restore       Restore session data from backup"lti-Session Startup Script
+# WhatsApp Multi-Session Startup Script
 
 echo "🚀 Starting WhatsApp Multi-Session Manager..."
 

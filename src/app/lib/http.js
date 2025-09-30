@@ -1,7 +1,12 @@
 import axios from 'axios'
 
-// Get API base URL from environment variables
+// Get API base URL and API key from environment variables
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
+const API_KEY = import.meta.env.VITE_API_KEY
+
+if (!API_KEY) {
+	console.error('❌ VITE_API_KEY not found in environment variables!')
+}
 
 // Create axios instance with default configuration
 const http = axios.create({
@@ -10,15 +15,22 @@ const http = axios.create({
 	headers: {
 		'Content-Type': 'application/json',
 		'Accept': 'application/json',
+		'X-API-Key': API_KEY,
 	},
 })
 
-// Request interceptor for logging and auth (if needed in future)
+// Request interceptor for logging and ensuring API key is present
 http.interceptors.request.use(
 	(config) => {
+		// Ensure API key is always present
+		if (API_KEY && !config.headers['X-API-Key']) {
+			config.headers['X-API-Key'] = API_KEY
+		}
+
 		// Log request in development
 		if (import.meta.env.DEV) {
 			console.log(`🚀 [HTTP] ${config.method?.toUpperCase()} ${config.url}`)
+			console.log(`🔑 [HTTP] API Key: ${API_KEY ? '✅ Present' : '❌ Missing'}`)
 		}
 		return config
 	},
@@ -41,6 +53,15 @@ http.interceptors.response.use(
 		// Enhanced error logging
 		if (error.response) {
 			console.error(`❌ [HTTP] ${error.response.status} ${error.response.config?.url}`)
+
+			// Handle API key authentication errors
+			if (error.response.status === 401) {
+				const errorData = error.response.data
+				if (errorData?.code === 'MISSING_API_KEY' || errorData?.code === 'INVALID_API_KEY') {
+					console.error('🔑 [AUTH] API Key authentication failed:', errorData.message)
+					// Could redirect to login or show auth error
+				}
+			}
 			console.error('Error data:', error.response.data)
 		} else if (error.request) {
 			console.error('❌ [HTTP] Network Error:', error.message)

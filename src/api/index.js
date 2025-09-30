@@ -6,10 +6,16 @@ const cors = require('cors')
 const swaggerUi = require('swagger-ui-express')
 const swaggerSpecs = require('./swagger')
 const sessionRoutes = require('./routes/session')
+const { validateApiKey, logApiAccess, rateLimiter, generateApiKey } = require('./middleware/auth')
 
 const app = express()
 app.use(cors())
 app.use(bodyParser.json())
+
+// Security middleware
+app.use(logApiAccess)
+app.use(rateLimiter)
+app.use(validateApiKey)
 
 // Swagger Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs, {
@@ -32,8 +38,39 @@ app.get('/health', (req, res) => {
 		timestamp: new Date(),
 		uptime: process.uptime(),
 		memory: process.memoryUsage(),
-		version: process.env.npm_package_version || '1.0.0'
+		version: process.env.npm_package_version || '1.0.0',
+		security: {
+			apiKeyFormat: 'UUID4 + SHA-512',
+			rateLimiting: 'Active',
+			authentication: 'Required'
+		}
 	})
+})
+
+// Admin endpoint to generate new API key (requires existing valid key)
+app.post('/admin/generate-api-key', (req, res) => {
+	try {
+		const newKey = generateApiKey()
+
+		res.json({
+			success: true,
+			message: 'New API key generated successfully',
+			data: {
+				clientKey: newKey.raw,
+				serverHash: newKey.hash,
+				instructions: {
+					client: 'Use clientKey for X-API-Key header',
+					server: 'Set WAAKU_API_KEY=' + newKey.hash + ' in environment'
+				}
+			}
+		})
+	} catch (error) {
+		res.status(500).json({
+			success: false,
+			error: 'Failed to generate API key',
+			message: error.message
+		})
+	}
 })
 
 // Redirect root to API documentation
