@@ -199,6 +199,66 @@ docker run --rm -v waaku_whatsapp_sessions:/data -v $(pwd):/backup alpine \
   tar czf /backup/sessions-backup.tar.gz -C /data .
 ```
 
+### Scaling
+
+Waaku can manage multiple WhatsApp sessions in a single app instance. Start by scaling vertically, and only then consider horizontal scaling.
+
+- Vertical scaling (simple):
+  - Allocate more CPU/RAM to the container/host.
+  - Keep `shm_size` large (the default compose uses 1GB) for Chromium stability.
+  - A single instance can handle many sessions; monitor memory usage and CPU.
+
+- Horizontal scaling (advanced):
+  - Run multiple app instances behind Nginx with sticky sessions for Socket.IO.
+  - Give each instance its own auth volume; do not share `.wwebjs_auth` across instances.
+  - Use the same `WAAKU_API_KEY` across instances so the same client key works everywhere.
+
+  Minimal compose override example (add as `docker-compose.override.yml`):
+
+  ```yaml
+  services:
+    whatsapp-app-2:
+      build: .
+      environment:
+        - NODE_ENV=production
+        - PORT=3000
+        - WAAKU_RUNTIME=linux
+        # - WAAKU_API_KEY=${WAAKU_API_KEY}
+        - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+        - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+      volumes:
+        - whatsapp_sessions_b:/usr/src/app/.wwebjs_auth
+      restart: unless-stopped
+      shm_size: '1gb'
+      networks:
+        - whatsapp-network
+
+  volumes:
+    whatsapp_sessions_b:
+      driver: local
+  ```
+
+  Update `nginx/nginx.conf` upstream with sticky sessions:
+
+  ```nginx
+  upstream whatsapp_app {
+      ip_hash;  # sticky per client IP for Socket.IO
+      server whatsapp-app:3000;
+      server whatsapp-app-2:3000;
+  }
+  ```
+
+  Apply and reload:
+
+  ```bash
+  docker compose up -d --build
+  docker compose exec nginx nginx -s reload
+  ```
+
+Notes:
+- Each instance manages its own session set on its own volume; the UI shows sessions for the instance you’re connected to. A unified multi-instance view would require a shared store/broker (not included).
+- Keep your API key secure; rotate via `/admin/generate-api-key` if needed.
+
 ## Security notes
 
 - Keep your RAW client key secret. Don’t share it publicly or embed it in public apps.
