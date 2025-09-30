@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Multi-Session API</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-6">WhatsApp Multi-Session API</h1>
+
+                <div class="mb-8">
+                    <p class="text-gray-600 text-lg mb-4">
+                        Welcome to the WhatsApp Multi-Session API! This service allows you to manage multiple WhatsApp sessions simultaneously.
+                    </p>
+                    <p class="text-gray-600">
+                        Use the links below to access different parts of the application:
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6 mb-8">
+                    <div class="border rounded-lg p-6 hover:shadow-md transition-shadow">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-3">🖥️ Web Interface</h2>
+                        <p class="text-gray-600 mb-4">Access the web-based user interface to manage your WhatsApp sessions.</p>
+                        <a href="/" class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">
+                            Open Web App
+                        </a>
+                    </div>
+
+                    <div class="border rounded-lg p-6 hover:shadow-md transition-shadow">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-3">📚 API Documentation</h2>
+                        <p class="text-gray-600 mb-4">Explore the REST API endpoints with interactive Swagger documentation.</p>
+                        <a href="/api-docs" class="inline-block bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors">
+                            View API Docs
+                        </a>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-4 mb-8">
+                    <div class="text-center p-4 bg-gray-50 rounded-lg">
+                        <h3 class="font-semibold text-gray-800 mb-2">Health Check</h3>
+                        <a href="/health" class="text-blue-500 hover:text-blue-700 text-sm">
+                            /health
+                        </a>
+                    </div>
+
+                    <div class="text-center p-4 bg-gray-50 rounded-lg">
+                        <h3 class="font-semibold text-gray-800 mb-2">Sessions Health</h3>
+                        <a href="/api/sessions/health" class="text-blue-500 hover:text-blue-700 text-sm">
+                            /api/sessions/health
+                        </a>
+                    </div>
+
+                    <div class="text-center p-4 bg-gray-50 rounded-lg">
+                        <h3 class="font-semibold text-gray-800 mb-2">Sessions List</h3>
+                        <a href="/api/sessions" class="text-blue-500 hover:text-blue-700 text-sm">
+                            /api/sessions
+                        </a>
+                    </div>
+                </div>
+
+                <div class="border-t pt-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">🚀 Quick Start</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="font-medium text-gray-800 mb-2">1. Create a Session</h3>
+                            <code class="bg-gray-100 p-2 rounded text-sm block">
+                                POST /api/sessions<br>
+                                Content-Type: application/json<br>
+                                { "id": "my-session" }
+                            </code>
+                        </div>
+
+                        <div>
+                            <h3 class="font-medium text-gray-800 mb-2">2. Get QR Code</h3>
+                            <code class="bg-gray-100 p-2 rounded text-sm block">
+                                GET /api/sessions/my-session/qr
+                            </code>
+                        </div>
+
+                        <div>
+                            <h3 class="font-medium text-gray-800 mb-2">3. Send Message (after authentication)</h3>
+                            <code class="bg-gray-100 p-2 rounded text-sm block">
+                                POST /api/sessions/my-session/send<br>
+                                Content-Type: application/json<br>
+                                { "to": "6281234567890", "message": "Hello!" }
+                            </code>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t pt-6 mt-8">
+                    <div class="flex justify-between items-center">
+                        <div class="text-gray-600 text-sm">
+                            WhatsApp Multi-Session API v1.0.0
+                        </div>
+                        <div class="space-x-4">
+                            <a href="https://github.com/your-repo" class="text-gray-500 hover:text-gray-700 text-sm">GitHub</a>
+                            <a href="/api-docs" class="text-gray-500 hover:text-gray-700 text-sm">Documentation</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple health check indicator
+        fetch('/health')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Service Health:', data);
+            })
+            .catch(error => {
+                console.error('Health check failed:', error);
+            });
+    </script>
+</body>
+</html>

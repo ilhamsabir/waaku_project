@@ -1,0 +1,36 @@
+# Development docker-compose for easier development
+version: '3.8'
+
+services:
+  whatsapp-app-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: whatsapp-sessions-dev
+    ports:
+      - "3000:3000"
+      - "1100:1100"  # Vite dev server
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - VITE_PORT=1100
+    env_file:
+      - .env.development
+    volumes:
+      # Mount source code for hot reload
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+      # Persist WhatsApp session data
+      - whatsapp_sessions_dev:/usr/src/app/.wwebjs_auth
+    restart: unless-stopped
+    networks:
+      - whatsapp-network-dev
+    command: npm run dev
+
+volumes:
+  whatsapp_sessions_dev:
+    driver: local
+
+networks:
+  whatsapp-network-dev:
+    driver: bridge

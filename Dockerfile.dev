@@ -1,0 +1,33 @@
+# Development Dockerfile
+FROM node:18-alpine
+
+# Install Chrome dependencies
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    freetype-dev \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
+
+# Set Chrome executable path
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+WORKDIR /usr/src/app
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies (including dev dependencies)
+RUN npm install
+
+# Create directory for WhatsApp sessions
+RUN mkdir -p /usr/src/app/.wwebjs_auth
+
+# Expose ports
+EXPOSE 3000 1100
+
+# Start development server
+CMD ["npm", "run", "dev"]

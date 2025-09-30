@@ -1,0 +1,252 @@
+{
+	"info": {
+		"_postman_id": "whatsapp-multi-session-api",
+		"name": "WhatsApp Multi-Session API",
+		"description": "Collection for testing WhatsApp Multi-Session API endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "whatsapp-multi-session"
+	},
+	"item": [
+		{
+			"name": "General",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Check general service health"
+					}
+				}
+			]
+		},
+		{
+			"name": "Sessions",
+			"item": [
+				{
+					"name": "List All Sessions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/sessions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"sessions"
+							]
+						},
+						"description": "Get list of all WhatsApp sessions"
+					}
+				},
+				{
+					"name": "Create Session",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"{{session_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/sessions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"sessions"
+							]
+						},
+						"description": "Create a new WhatsApp session"
+					}
+				},
+				{
+					"name": "Get QR Code",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/sessions/{{session_id}}/qr",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"sessions",
+								"{{session_id}}",
+								"qr"
+							]
+						},
+						"description": "Get QR code for session authentication"
+					}
+				},
+				{
+					"name": "Restart Session",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/sessions/{{session_id}}/restart",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"sessions",
+								"{{session_id}}",
+								"restart"
+							]
+						},
+						"description": "Restart a WhatsApp session"
+					}
+				}
+			]
+		},
+		{
+			"name": "Messages",
+			"item": [
+				{
+					"name": "Validate Number",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"to\": \"{{phone_number}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/sessions/{{session_id}}/validate",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"sessions",
+								"{{session_id}}",
+								"validate"
+							]
+						},
+						"description": "Validate if a phone number exists on WhatsApp"
+					}
+				},
+				{
+					"name": "Send Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"to\": \"{{phone_number}}\",\n  \"message\": \"{{message_text}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/sessions/{{session_id}}/send",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"sessions",
+								"{{session_id}}",
+								"send"
+							]
+						},
+						"description": "Send a WhatsApp message"
+					}
+				}
+			]
+		},
+		{
+			"name": "Health Monitoring",
+			"item": [
+				{
+					"name": "All Sessions Health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/sessions/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"sessions",
+								"health"
+							]
+						},
+						"description": "Get health status of all sessions"
+					}
+				},
+				{
+					"name": "Specific Session Health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/sessions/{{session_id}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"sessions",
+								"{{session_id}}",
+								"health"
+							]
+						},
+						"description": "Get health status of a specific session"
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "session_id",
+			"value": "test-session",
+			"type": "string"
+		},
+		{
+			"key": "phone_number",
+			"value": "6281234567890",
+			"type": "string"
+		},
+		{
+			"key": "message_text",
+			"value": "Hello from WhatsApp Multi-Session API!",
+			"type": "string"
+		}
+	]
+}
