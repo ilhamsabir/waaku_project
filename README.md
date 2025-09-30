@@ -191,39 +191,46 @@ phone_number: 6281234567890
 message_text: Hello from API!
 ```
 
-## �📝 API Endpoints
+## 📝 API Endpoints
 
 ### 🔧 General
 - `GET /health` - Check general service health
 
 ### 📱 Sessions Management
-- `GET /api/sessions` - List semua sessions
-- `POST /api/sessions` - Buat session baru
-- `GET /api/sessions/:id/qr` - Get QR code untuk session
-- `POST /api/sessions/:id/restart` - Restart session tertentu
+- `GET /api/sessions` - List all sessions
+- `POST /api/sessions` - Create a new session
+- `GET /api/sessions/:id/qr` - Get QR code for a session
+- `POST /api/sessions/:id/restart` - Restart a specific session
 
 ### 💬 Messages
-- `POST /api/sessions/:id/validate` - Validasi nomor WhatsApp
-- `POST /api/sessions/:id/send` - Kirim pesan
+- `POST /api/sessions/:id/validate` - Validate a WhatsApp number
+- `POST /api/sessions/:id/send` - Send a message
 
 ### 🏥 Health Monitoring
-- `GET /api/sessions/health` - Health check semua sessions
-- `GET /api/sessions/:id/health` - Health check session tertentu### Request Examples
+- `GET /api/sessions/health` - Health check for all sessions
+- `GET /api/sessions/:id/health` - Health check for a specific session
+
+### Request Examples
+
+> **Note:** All API requests require the `X-API-Key` header with your raw UUIDv4 key (32 hex chars, no dashes).
 
 ```bash
-# Buat session baru
+# Create a new session
 curl -X POST http://localhost:3000/api/sessions \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: <your-raw-uuidv4>" \
   -d '{"id": "session1"}'
 
-# Validasi nomor
+# Validate a number
 curl -X POST http://localhost:3000/api/sessions/session1/validate \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: <your-raw-uuidv4>" \
   -d '{"to": "6281234567890"}'
 
-# Kirim pesan
+# Send a message
 curl -X POST http://localhost:3000/api/sessions/session1/send \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: <your-raw-uuidv4>" \
   -d '{"to": "6281234567890", "message": "Hello World!"}'
 ```
 
