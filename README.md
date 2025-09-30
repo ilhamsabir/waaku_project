@@ -15,7 +15,7 @@ Manage multiple WhatsApp sessions with a modern Vue 3 UI, secure Express API, re
 - Frontend UI login (env-based) for dashboard access
 - Docker and docker‑compose for dev and prod
 
-## Stack
+## Tech Stack
 
 - Frontend: Vue 3, Vite, Tailwind CSS, Socket.IO client
 - Backend: Node.js/Express, whatsapp-web.js, Socket.IO, Swagger
@@ -46,6 +46,15 @@ vite.config.js, tailwind.config.js
 
 - Node.js 18+ (for local runs)
 - Docker + docker‑compose (optional but recommended)
+
+## Minimum requirements (hardware/server)
+
+- OS: Linux x86_64 (recommended) or macOS; Docker installed (for container runs)
+- CPU: 1 vCPU minimum; 2+ vCPU recommended for 5–10 active sessions
+- RAM: 1.5 GB minimum for a few sessions; 2–4 GB recommended; increase for heavy use
+- Disk: 1 GB free for app + growth for WhatsApp auth data per session
+- Network: stable internet connectivity; open ports 3000 (app/API), optionally 80/443 (via Nginx)
+- Docker: shared memory size (shm) ≥ 1 GB for Chromium stability (already set in compose)
 
 ## Quick start (local)
 
@@ -107,6 +116,10 @@ docker compose -f docker-compose.dev.yml up --build
 
 - API: http://localhost:3000
 - Vite: http://localhost:1100 (respects VITE_PORT)
+
+## Usage guide
+
+For step‑by‑step operator instructions (Docker/local), QR workflow, and cURL API examples, see `usage.md`.
 
 ## Security model (API)
 
@@ -172,10 +185,6 @@ MIT License. See LICENSE file if present; otherwise, contributions are assumed M
 
 ## Support
 
-If this project helps you, consider buying me a coffee:
-
-<a href="https://buymeacoffee.com/ilhamsabir" target="_blank" rel="noopener noreferrer"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" height="41" width="174"></a>
-
 base_url: http://localhost:3000
 session_id: test-session
 phone_number: 6281234567890
@@ -232,12 +241,17 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## 📞 Support
 
-Jika Anda mengalami masalah atau memiliki pertanyaan:
+If you encounter issues or have questions:
 
-1. Check [Issues](../../issues) untuk masalah yang sudah diketahui
-2. Buat [Issue baru](../../issues/new) jika diperlukan
-3. Lihat logs dengan `docker-compose logs` untuk debugging
+1. Check the [Issues](../../issues) for known problems
+2. Create a [new Issue](../../issues/new) if needed
+3. View logs with `docker-compose logs` for debugging
 
 ---
 
-**Note**: Aplikasi ini menggunakan WhatsApp Web API unofficial. Pastikan mematuhi [Terms of Service WhatsApp](https://www.whatsapp.com/legal/) saat menggunakan aplikasi ini.
+**Note**: This app uses the unofficial WhatsApp Web API. Please ensure you comply with the [WhatsApp Terms of Service](https://www.whatsapp.com/legal/) when using this application.
+
+
+If this project helps you, consider buying me a coffee:
+
+<a href="https://buymeacoffee.com/ilhamsabir" target="_blank" rel="noopener noreferrer"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" height="41" width="174"></a>
