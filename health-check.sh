@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # WhatsApp Sessions Health Check Script
+# Deprecated: use curl directly or check /health endpoint
 # Usage: ./health-check.sh [URL] [--verbose]
 
 # Default configuration

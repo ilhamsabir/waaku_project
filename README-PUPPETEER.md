@@ -23,5 +23,5 @@ Run on macOS locally (no Docker):
 
 Run in Docker (default):
 
-    # docker-compose.dev.yml already sets WAAKU_RUNTIME=linux
-    ./start.sh dev
+  # For Docker, WAAKU_RUNTIME=linux (see docker-compose.yml)
+  npm run dev

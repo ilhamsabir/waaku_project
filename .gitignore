@@ -8,6 +8,10 @@ yarn-error.log*
 dist/
 build/
 
+# Avoid accidental root-level Tailwind outputs
+output.css
+*.tailwind.css
+
 # Environment files
 .env
 .env.local

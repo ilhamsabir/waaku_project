@@ -16,7 +16,6 @@ show_usage() {
     echo ""
     echo "Options:"
     echo "  start         Start the application in production mode"
-    echo "  dev           Start the application in development mode"
     echo "  stop          Stop the application"
     echo "  restart       Restart the application"
     echo "  logs          Show application logs"
@@ -40,17 +39,9 @@ case $MODE in
         docker-compose up -d
         echo "✅ Application started at http://localhost:3000"
         ;;
-    "dev")
-        echo "🔧 Starting in development mode..."
-        docker-compose -f docker-compose.dev.yml up -d
-        echo "✅ Development server started:"
-        echo "   Backend: http://localhost:3000"
-        echo "   Frontend: http://localhost:1100"
-        ;;
     "stop")
         echo "⏹️  Stopping application..."
         docker-compose down
-        docker-compose -f docker-compose.dev.yml down 2>/dev/null || true
         echo "✅ Application stopped"
         ;;
     "restart")
@@ -71,8 +62,7 @@ case $MODE in
         ;;
     "setup")
         echo "🔧 Setting up development environment..."
-        chmod +x dev-setup.sh
-        ./dev-setup.sh
+        echo "Deprecated: use npm run dev instead"
         ;;
     "local")
         echo "💻 Starting local development (without Docker)..."
@@ -90,7 +80,6 @@ case $MODE in
     "clean")
         echo "🧹 Cleaning up..."
         docker-compose down -v
-        docker-compose -f docker-compose.dev.yml down -v 2>/dev/null || true
         docker system prune -f
         echo "✅ Cleanup completed"
         ;;

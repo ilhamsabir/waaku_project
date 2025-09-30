@@ -1,4 +1,5 @@
 #!/bin/sh
+# Note: This script is optional; docker-compose uses a simple curl healthcheck by default.
 
 # Docker healthcheck script for WhatsApp Multi-Session API
 # This script is used by Docker to determine if the container is healthy

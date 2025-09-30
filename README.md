@@ -33,12 +33,12 @@ src/
     whatsapp/session.js # WhatsApp client lifecycle + socket emits
   app/
     App.vue             # Main Vue app (now with env-based login)
-    main.js, index.css, components/
+    main.js, assets/css/tailwind.css, components/
     lib/http.js         # Axios with X-API-Key header
     lib/api.js          # API wrapper
     lib/socket.js       # Socket.IO client
-Dockerfile, Dockerfile.dev
-docker-compose.yml, docker-compose.dev.yml
+Dockerfile
+docker-compose.yml
 vite.config.js, tailwind.config.js
 ```
 
@@ -108,14 +108,12 @@ docker compose up --build -d
 
 Open http://localhost:3000. Provide envs (WAAKU_API_KEY, optionally VITE vars) via compose or image environment.
 
-Development:
+Development (local, no Docker):
 
 ```bash
-docker compose -f docker-compose.dev.yml up --build
+npm install
+npm run dev
 ```
-
-- API: http://localhost:3000
-- Vite: http://localhost:1100 (respects VITE_PORT)
 
 ## Usage guide
 

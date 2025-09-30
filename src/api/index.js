@@ -104,7 +104,7 @@ app.use('/api/sessions', sessionRoutes)
 // Check if dist folder exists, if not serve development fallback
 const fs = require('fs')
 const distPath = path.join(__dirname, '../../dist')
-const distIndexPath = path.join(distPath, 'index.html')
+const distIndexPath = path.join(distPath, '../../public/index.html')
 
 // Serve frontend build (dist) - but only for non-API routes
 if (fs.existsSync(distPath)) {
@@ -128,25 +128,6 @@ app.get('*', (req, res) => {
 	} else if (fs.existsSync(distIndexPath)) {
 		// Fallback to built frontend if exists
 		res.sendFile(distIndexPath)
-	} else {
-		// Last fallback: development page
-		const fallbackPath = path.join(__dirname, '../../public/fallback.html')
-		if (fs.existsSync(fallbackPath)) {
-			res.sendFile(fallbackPath)
-		} else {
-			// Last resort: simple JSON response
-			res.status(200).json({
-				message: 'WhatsApp Multi-Session API',
-				status: 'running',
-				mode: 'api-only',
-				frontend: 'not-built',
-				documentation: '/api-docs',
-				health: '/health',
-				sessions: '/api/sessions',
-				build_command: 'npm run build'
-			})
-		}
-
 	}
 })
 
