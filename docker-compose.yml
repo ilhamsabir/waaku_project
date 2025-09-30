@@ -9,12 +9,15 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
     volumes:
       # Persist WhatsApp session data
       - whatsapp_sessions:/usr/src/app/.wwebjs_auth
       # Optionally mount logs
       - ./logs:/usr/src/app/logs
     restart: unless-stopped
+    shm_size: '1gb'
     networks:
       - whatsapp-network
     healthcheck:

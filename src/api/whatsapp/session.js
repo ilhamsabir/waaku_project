@@ -9,15 +9,20 @@ function createSession(id) {
 		authStrategy: new LocalAuth({ clientId: id }),
 		puppeteer: {
 			headless: true,
+			executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser',
 			args: [
 				'--no-sandbox',
 				'--disable-setuid-sandbox',
 				'--disable-dev-shm-usage',
 				'--disable-accelerated-2d-canvas',
+				'--disable-software-rasterizer',
 				'--no-first-run',
+				'--no-default-browser-check',
 				'--no-zygote',
-				'--single-process',
-				'--disable-gpu'
+				'--disable-gpu',
+				'--window-size=1920,1080',
+				'--user-data-dir=/tmp/chrome',
+				'--remote-debugging-port=9222'
 			]
 		},
 	})

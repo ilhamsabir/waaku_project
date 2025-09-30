@@ -23,6 +23,7 @@ services:
       # Persist WhatsApp session data
       - whatsapp_sessions_dev:/usr/src/app/.wwebjs_auth
     restart: unless-stopped
+    shm_size: '1gb'
     networks:
       - whatsapp-network-dev
     command: npm run dev
