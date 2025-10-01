@@ -8,6 +8,7 @@ const compression = require('compression')
 const swaggerUi = require('swagger-ui-express')
 const swaggerSpecs = require('./swagger')
 const sessionRoutes = require('./routes/session')
+const messageRoutes = require('./routes/messages')
 const { validateApiKey, logApiAccess, rateLimiter, generateApiKey } = require('./middleware/auth')
 const { initSocketIO } = require('./socket')
 
@@ -100,6 +101,7 @@ app.get('/api-info', (req, res) => {
 
 // API routes
 app.use('/api/sessions', sessionRoutes)
+app.use('/api/messages', messageRoutes)
 
 app.use('*', (req, res) => {
 	res.status(200).send(`Waaku`)

@@ -147,12 +147,16 @@ Admin helper: POST /admin/generate-api-key returns a client key + server hash (r
   - GET    /api/sessions
   - POST   /api/sessions { id }
   - GET    /api/sessions/:id/qr
-  - POST   /api/sessions/:id/validate { to }
-  - POST   /api/sessions/:id/send { to, message }
   - GET    /api/sessions/health
   - GET    /api/sessions/:id/health
   - POST   /api/sessions/:id/restart
   - DELETE /api/sessions/:id
+
+- Messages (new dedicated routes)
+  - POST   /api/messages/:id/validate { to }
+  - POST   /api/messages/:id/send { to, message }
+
+Note: The legacy endpoints under /api/sessions/:id/(validate|send) remain available for backward compatibility.
 
 ## Troubleshooting
 

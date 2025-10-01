@@ -88,7 +88,7 @@ export const generateQRCode = async (sessionId) => {
  * @returns {Promise} Validation result
  */
 export const validatePhoneNumber = async (sessionId, phoneNumber) => {
-	const response = await http.post(`/api/sessions/${sessionId}/validate`, {
+	const response = await http.post(`/api/messages/${sessionId}/validate`, {
 		to: phoneNumber
 	})
 	return response.data
@@ -102,7 +102,7 @@ export const validatePhoneNumber = async (sessionId, phoneNumber) => {
  * @returns {Promise} Send result
  */
 export const sendMessage = async (sessionId, phoneNumber, message) => {
-	const response = await http.post(`/api/sessions/${sessionId}/send`, {
+	const response = await http.post(`/api/messages/${sessionId}/send`, {
 		to: phoneNumber,
 		message: message
 	})
