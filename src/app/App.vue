@@ -504,10 +504,47 @@ function initAfterAuth() {
 
 	const updateSessions = (list) => {
 		sessions.value = list
+		// Auto-close QR modal if the session became ready, disconnected, or removed
+		if (qrModal.visible && qrModal.sessionId) {
+			const s = list.find(x => x.id === qrModal.sessionId)
+			if (!s || s.ready || s.status === 'disconnected') {
+				closeQrModal()
+			}
+		}
+		// Also clear QR image for sessions that are now ready or disconnected so the button hides
+		for (const s of list) {
+			if (s.ready || s.status === 'disconnected') {
+				if (qr[s.id]) qr[s.id] = ''
+				qrLoading[s.id] = false
+			}
+		}
 	}
 	const onSessionUpdate = (list) => updateSessions(list)
-	const onSessionReady = () => fetchAllData()
+	const onSessionReady = (payload) => {
+		// If ready event pertains to the currently open QR modal session, close it
+		if (payload && payload.id && qrModal.visible && qrModal.sessionId === payload.id) {
+			closeQrModal()
+		}
+		// Clear QR cache for this session so the QR button disappears
+		if (payload && payload.id) {
+			qr[payload.id] = ''
+			qrLoading[payload.id] = false
+		}
+		fetchAllData()
+	}
 	const onSessionError = () => fetchAllData()
+	const onSessionDisconnected = ({ id, reason }) => {
+		// Close QR modal if it's showing the disconnected session
+		if (qrModal.visible && qrModal.sessionId === id) {
+			closeQrModal()
+		}
+		// Clear any cached QR and loading state for this session
+		if (id) {
+			qr[id] = ''
+			qrLoading[id] = false
+		}
+		showNotification(`Session ${id} disconnected${reason ? `: ${reason}` : ''}`, 'error')
+	}
 	const onQR = ({ id, qr: qrStr }) => {
 		if (qrStr) qr[id] = qrStr
 		// stop loader for this session once QR arrives
@@ -520,6 +557,7 @@ function initAfterAuth() {
 	onSocket('sessions:update', onSessionUpdate)
 	onSocket('session:ready', onSessionReady)
 	onSocket('session:error', onSessionError)
+	onSocket('session:disconnected', onSessionDisconnected)
 	onSocket('session:qr', onQR)
 	onSocket('health:update', onHealthUpdate)
 
@@ -527,6 +565,7 @@ function initAfterAuth() {
 		offSocket('sessions:update', onSessionUpdate)
 		offSocket('session:ready', onSessionReady)
 		offSocket('session:error', onSessionError)
+		offSocket('session:disconnected', onSessionDisconnected)
 		offSocket('session:qr', onQR)
 		offSocket('health:update', onHealthUpdate)
 	}
