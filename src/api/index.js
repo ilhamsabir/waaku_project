@@ -31,7 +31,6 @@ app.use(compression())
 // Security middleware
 app.use(logApiAccess)
 app.use(rateLimiter)
-app.use(validateApiKey)
 
 // Swagger Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs, {
@@ -68,12 +67,18 @@ app.get('/api', (req, res) => {
 	res.redirect('/api-docs')
 })
 
-// API routes
+// API routes (protected by API key)
+app.use('/api', validateApiKey)
 app.use('/api/sessions', sessionRoutes)
 app.use('/api/messages', messageRoutes)
 
-app.use('*', (req, res) => {
-	res.status(200).send(`Waaku`)
+// Serve built frontend (Vite dist) in production
+const frontendDir = path.resolve(__dirname, '../../dist')
+app.use(express.static(frontendDir, { maxAge: '1h', index: false }))
+
+// SPA fallback: send index.html for non-API routes
+app.get(/^\/(?!api|api-docs|health).*/, (req, res) => {
+	res.sendFile(path.join(frontendDir, 'index.html'))
 })
 
 // Initialize Socket.IO and export via socket singleton

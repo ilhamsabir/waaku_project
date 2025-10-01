@@ -106,7 +106,7 @@ Production‑like:
 docker compose up --build -d
 ```
 
-Open http://localhost:1100 (compose maps 1100:3000). Provide envs (WAAKU_API_KEY, optionally VITE vars) via compose or image environment.
+Open http://localhost:3000. Provide envs (WAAKU_API_KEY, optionally VITE vars) via compose or image environment.
 
 Development (local, no Docker):
 

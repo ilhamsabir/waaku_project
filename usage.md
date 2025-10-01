@@ -44,7 +44,7 @@ services:
     image: ilhamsabir/waaku-app:latest
     container_name: waaku
     ports:
-      - "1100:3000"
+      - "3000:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
