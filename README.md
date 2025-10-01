@@ -113,6 +113,33 @@ Development (local, no Docker):
 ```bash
 npm install
 npm run dev
+
+### Run directly from Docker Hub (no build)
+
+You can pull and run the prebuilt image without cloning the repo:
+
+```bash
+docker pull ilhamsabir/waaku-app:latest
+docker run -d \
+  --name waaku \
+  -p 3000:3000 \
+  --shm-size=1g \
+  -e NODE_ENV=production \
+  -e PORT=3000 \
+  -e WAAKU_RUNTIME=linux \
+  -e PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+  -e PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
+  -e WAAKU_API_KEY=<sha512_of_raw_uuid> \
+  -e VITE_API_KEY=<raw_uuid_no_dashes> \
+  -v waaku_whatsapp_sessions:/usr/src/app/.wwebjs_auth \
+  ilhamsabir/waaku-app:latest
+```
+
+Notes:
+- Set VITE_API_KEY to the RAW UUID (32 hex chars, no dashes)
+- Set WAAKU_API_KEY to the SHA‑512 hash of that RAW UUID
+- The named volume `waaku_whatsapp_sessions` persists WhatsApp auth data
+- Access the UI at http://localhost:3000 and Swagger at http://localhost:3000/api-docs
 ```
 
 ## Usage guide

@@ -13,6 +13,62 @@ If you’re looking to contribute or dive into the code, see `README.md`.
 
 ## Quick start (recommended: Docker)
 
+### Option A — Run directly from Docker Hub (no build)
+
+Quickest way to get started without cloning the repo:
+
+```bash
+docker pull ilhamsabir/waaku-app:latest
+docker run -d \
+  --name waaku \
+  -p 3000:3000 \
+  --shm-size=1g \
+  -e NODE_ENV=production \
+  -e PORT=3000 \
+  -e WAAKU_RUNTIME=linux \
+  -e PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+  -e PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
+  -e WAAKU_API_KEY=<sha512_of_raw_uuid> \
+  -e VITE_API_KEY=<raw_uuid_no_dashes> \
+  -v waaku_whatsapp_sessions:/usr/src/app/.wwebjs_auth \
+  ilhamsabir/waaku-app:latest
+```
+
+Open http://localhost:3000. The named volume `waaku_whatsapp_sessions` persists WhatsApp auth data.
+
+If you prefer docker-compose with the prebuilt image:
+
+```yaml
+services:
+  waaku-app:
+    image: ilhamsabir/waaku-app:latest
+    container_name: waaku
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - WAAKU_RUNTIME=linux
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+      - WAAKU_API_KEY=${WAAKU_API_KEY}
+      - VITE_API_KEY=${VITE_API_KEY}
+    volumes:
+      - waaku_whatsapp_sessions:/usr/src/app/.wwebjs_auth
+    restart: unless-stopped
+    shm_size: '1gb'
+volumes:
+  waaku_whatsapp_sessions:
+    driver: local
+```
+
+Then run:
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
 Prerequisites:
 
 - Docker and Docker Compose installed
