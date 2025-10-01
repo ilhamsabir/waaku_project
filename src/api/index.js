@@ -101,34 +101,8 @@ app.get('/api-info', (req, res) => {
 // API routes
 app.use('/api/sessions', sessionRoutes)
 
-// Check if dist folder exists, if not serve development fallback
-const fs = require('fs')
-const distPath = path.join(__dirname, '../../dist')
-const distIndexPath = path.join(distPath, '../../public/index.html')
-
-// Serve frontend build (dist) - but only for non-API routes
-if (fs.existsSync(distPath)) {
-	app.use(express.static(distPath, { maxAge: '1y', etag: true, immutable: true }))
-} else {
-	console.warn('⚠️  Dist folder not found. Running in API-only mode.')
-	console.warn('💡 Run "npm run build" to generate frontend assets.')
-}
-
-// Catch-all handler: send back index.html file for frontend routes
-app.get('*', (req, res) => {
-	// Don't interfere with API routes
-	if (req.path.startsWith('/api') || req.path.startsWith('/health')) {
-		return res.status(404).json({ error: 'API endpoint not found' })
-	}
-
-	// Serve public/index.html as main frontend
-	const publicIndexPath = path.join(__dirname, '../../public/index.html')
-	if (fs.existsSync(publicIndexPath)) {
-		res.sendFile(publicIndexPath)
-	} else if (fs.existsSync(distIndexPath)) {
-		// Fallback to built frontend if exists
-		res.sendFile(distIndexPath)
-	}
+app.use('*', (req, res) => {
+	res.status(200).send(`Waaku`)
 })
 
 // Initialize Socket.IO and export via socket singleton
