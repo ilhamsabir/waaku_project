@@ -21,7 +21,7 @@ Quickest way to get started without cloning the repo:
 docker pull ilhamsabir/waaku-app:latest
 docker run -d \
   --name waaku \
-  -p 1100:3000 \
+  -p 3000:3000 \
   --shm-size=1g \
   -e NODE_ENV=production \
   -e PORT=3000 \
