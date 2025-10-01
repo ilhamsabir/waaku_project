@@ -24,14 +24,17 @@ WORKDIR /usr/src/app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install all dependencies (including dev) for build
+RUN npm ci
 
 # Copy source code
 COPY . .
 
 # Build the frontend
 RUN npm run build
+
+# Prune devDependencies for a slimmer production image
+RUN npm prune --production && npm cache clean --force
 
 # Create directory for WhatsApp sessions
 RUN mkdir -p /usr/src/app/.wwebjs_auth

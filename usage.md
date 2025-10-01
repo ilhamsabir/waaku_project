@@ -217,7 +217,7 @@ Waaku can manage multiple WhatsApp sessions in a single app instance. Start by s
 
   ```yaml
   services:
-    whatsapp-app-2:
+  waaku-app-2:
       build: .
       environment:
         - NODE_ENV=production
@@ -231,7 +231,7 @@ Waaku can manage multiple WhatsApp sessions in a single app instance. Start by s
       restart: unless-stopped
       shm_size: '1gb'
       networks:
-        - whatsapp-network
+  - waaku-network
 
   volumes:
     whatsapp_sessions_b:
@@ -243,8 +243,8 @@ Waaku can manage multiple WhatsApp sessions in a single app instance. Start by s
   ```nginx
   upstream whatsapp_app {
       ip_hash;  # sticky per client IP for Socket.IO
-      server whatsapp-app:3000;
-      server whatsapp-app-2:3000;
+  server waaku-app:3000;
+  server waaku-app-2:3000;
   }
   ```
 

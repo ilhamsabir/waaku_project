@@ -1,7 +1,8 @@
 version: '3.8'
 
 services:
-  whatsapp-app:
+  waaku-app:
+    image: waaku-app:latest
     build: .
     container_name: waaku
     env_file:
@@ -26,7 +27,7 @@ services:
     restart: unless-stopped
     shm_size: '1gb'
     networks:
-      - whatsapp-network
+      - waaku-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000"]
       interval: 30s
@@ -37,7 +38,7 @@ services:
   # Optional: Add nginx reverse proxy
   nginx:
     image: nginx:alpine
-    container_name: whatsapp-nginx
+    container_name: waaku-nginx
     ports:
       - "80:80"
       - "443:443"
@@ -45,10 +46,10 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/ssl:/etc/nginx/ssl
     depends_on:
-      - whatsapp-app
+      - waaku-app
     restart: unless-stopped
     networks:
-      - whatsapp-network
+      - waaku-network
     profiles:
       - with-nginx
 
@@ -57,5 +58,5 @@ volumes:
     driver: local
 
 networks:
-  whatsapp-network:
+  waaku-network:
     driver: bridge
