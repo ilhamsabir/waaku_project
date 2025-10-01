@@ -7,7 +7,7 @@
 
 /**
  * @swagger
- * /api/sessions/{id}/validate:
+ * /api/messages/{id}/validate:
  *   post:
  *     summary: Validate WhatsApp number
  *     description: |
@@ -17,6 +17,8 @@
  *       **Requirements:**
  *       - Session must be in 'ready' status
  *       - Phone number must be in international format (without + sign)
+ *
+ *       Note: Legacy endpoints `/api/sessions/{id}/validate` and `/api/sessions/{id}/send` are still supported but deprecated.
  *     tags: [Messages]
  *     parameters:
  *       - in: path
@@ -87,7 +89,7 @@
 
 /**
  * @swagger
- * /api/sessions/{id}/send:
+ * /api/messages/{id}/send:
  *   post:
  *     summary: Send WhatsApp message
  *     description: |
@@ -102,6 +104,8 @@
  *       - Use the validation endpoint first to check if number exists
  *       - Phone numbers should be in international format (without + sign)
  *       - Messages are sent as plain text
+ *
+ *       Note: Legacy endpoints `/api/sessions/{id}/validate` and `/api/sessions/{id}/send` are still supported but deprecated.
  *     tags: [Messages]
  *     parameters:
  *       - in: path

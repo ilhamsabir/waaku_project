@@ -63,40 +63,9 @@ app.get('/health', (req, res) => {
 	})
 })
 
-// Admin endpoint to generate new API key (requires existing valid key)
-app.post('/admin/generate-api-key', (req, res) => {
-	try {
-		const newKey = generateApiKey()
-
-		res.json({
-			success: true,
-			message: 'New API key generated successfully',
-			data: {
-				clientKey: newKey.raw,
-				serverHash: newKey.hash,
-				instructions: {
-					client: 'Use clientKey for X-API-Key header',
-					server: 'Set WAAKU_API_KEY=' + newKey.hash + ' in environment'
-				}
-			}
-		})
-	} catch (error) {
-		res.status(500).json({
-			success: false,
-			error: 'Failed to generate API key',
-			message: error.message
-		})
-	}
-})
-
 // Redirect root to API documentation
 app.get('/api', (req, res) => {
 	res.redirect('/api-docs')
-})
-
-// Serve API info page
-app.get('/api-info', (req, res) => {
-	res.sendFile(path.join(__dirname, '../../public/api-info.html'))
 })
 
 // API routes
