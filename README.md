@@ -53,7 +53,7 @@ vite.config.js, tailwind.config.js
 - CPU: 1 vCPU minimum; 2+ vCPU recommended for 5–10 active sessions
 - RAM: 1.5 GB minimum for a few sessions; 2–4 GB recommended; increase for heavy use
 - Disk: 1 GB free for app + growth for WhatsApp auth data per session
-- Network: stable internet connectivity; open ports 3000 (app/API), optionally 80/443 (via Nginx)
+- Network: stable internet connectivity; open ports 1100 (app/API via Docker), optionally 80/443 (via Nginx)
 - Docker: shared memory size (shm) ≥ 1 GB for Chromium stability (already set in compose)
 
 ## Quick start (local)
@@ -106,7 +106,7 @@ Production‑like:
 docker compose up --build -d
 ```
 
-Open http://localhost:3000. Provide envs (WAAKU_API_KEY, optionally VITE vars) via compose or image environment.
+Open http://localhost:1100 (compose maps 1100:3000). Provide envs (WAAKU_API_KEY, optionally VITE vars) via compose or image environment.
 
 Development (local, no Docker):
 
@@ -122,7 +122,7 @@ You can pull and run the prebuilt image without cloning the repo:
 docker pull ilhamsabir/waaku-app:latest
 docker run -d \
   --name waaku \
-  -p 3000:3000 \
+  -p 1100:3000 \
   --shm-size=1g \
   -e NODE_ENV=production \
   -e PORT=3000 \

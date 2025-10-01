@@ -21,7 +21,7 @@ Quickest way to get started without cloning the repo:
 docker pull ilhamsabir/waaku-app:latest
 docker run -d \
   --name waaku \
-  -p 3000:3000 \
+  -p 1100:3000 \
   --shm-size=1g \
   -e NODE_ENV=production \
   -e PORT=3000 \
@@ -34,7 +34,7 @@ docker run -d \
   ilhamsabir/waaku-app:latest
 ```
 
-Open http://localhost:3000. The named volume `waaku_whatsapp_sessions` persists WhatsApp auth data.
+Open http://localhost:1100. The named volume `waaku_whatsapp_sessions` persists WhatsApp auth data.
 
 If you prefer docker-compose with the prebuilt image:
 
@@ -44,7 +44,7 @@ services:
     image: ilhamsabir/waaku-app:latest
     container_name: waaku
     ports:
-      - "3000:3000"
+      - "1100:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
@@ -117,10 +117,10 @@ WAAKU_RUNTIME=linux
 docker compose up --build -d
 ```
 
-Open http://localhost:3000
+Open http://localhost:1100
 
-- The web UI is served on port 3000 (with the API)
-- Swagger docs: http://localhost:3000/api-docs
+- The web UI/API is exposed on port 1100 (container listens on 3000)
+- Swagger docs: http://localhost:1100/api-docs
 
 5) Log in to the dashboard
 
