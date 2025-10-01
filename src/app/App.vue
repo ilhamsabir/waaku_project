@@ -215,6 +215,14 @@
 							</div>
 
 							<div class="flex items-center space-x-2">
+								<button @click="openQrModal(s.id)"
+									class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors flex items-center"
+									title="Show QR Code">
+									<svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+									</svg>
+									Show QR
+								</button>
 								<button @click="checkSessionHealth(s.id)" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Check Health">
 									<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -230,45 +238,6 @@
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
 									</svg>
 								</button>
-							</div>
-						</div>
-					</div>
-
-					<!-- QR Code Section -->
-					<div v-if="!s.ready && !s.error" class="p-6">
-						<div class="text-center">
-							<div class="mb-4">
-								<h4 class="text-lg font-semibold text-gray-900 mb-2">📱 Connect WhatsApp</h4>
-								<p class="text-gray-600">Scan the QR code with your WhatsApp mobile app</p>
-							</div>
-
-							<div class="flex justify-center mb-4">
-								<button
-									v-if="!qr[s.id]"
-									@click="loadQr(s.id)"
-									:disabled="qrLoading[s.id]"
-									:aria-busy="qrLoading[s.id] ? 'true' : 'false'"
-									:aria-disabled="qrLoading[s.id] ? 'true' : 'false'"
-									class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed disabled:pointer-events-none text-white font-semibold rounded-xl transition-all duration-200 transform disabled:scale-100 shadow-lg flex items-center justify-center"
-								>
-									<svg v-if="!qrLoading[s.id]" class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
-									</svg>
-									<svg v-else class="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-										<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-										<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-									</svg>
-									<span>{{ qrLoading[s.id] ? 'Generating...' : 'Generate QR Code' }}</span>
-								</button>
-							</div>
-
-							<div v-if="qr[s.id]" class="inline-block">
-								<div class="bg-white p-4 rounded-2xl shadow-lg border-2 border-gray-200">
-									<img :src="qr[s.id]" alt="WhatsApp QR Code" class="w-64 h-64 mx-auto"/>
-								</div>
-								<p class="mt-4 text-sm text-gray-500 max-w-md mx-auto">
-									Open WhatsApp on your phone → Settings → Linked Devices → Link a Device → Scan this QR code
-								</p>
 							</div>
 						</div>
 					</div>
@@ -384,6 +353,34 @@
 			@close="closeModal"
 			@submit="handleCreateSession"
 		/>
+
+		<!-- QR Modal -->
+		<div v-if="qrModal.visible" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+			<div class="bg-white rounded-2xl p-6 shadow-2xl w-[90vw] max-w-md mx-4">
+				<div class="flex items-center justify-between mb-4">
+					<h3 class="text-lg font-semibold text-gray-900">Scan QR — {{ qrModal.sessionId }}</h3>
+					<button @click="closeQrModal" class="p-2 rounded-lg hover:bg-gray-100">
+						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+						</svg>
+					</button>
+				</div>
+				<div class="flex flex-col items-center">
+					<div v-if="qrLoading[qrModal.sessionId]" class="flex items-center justify-center h-72 w-72">
+						<svg class="animate-spin h-8 w-8 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+						</svg>
+					</div>
+					<div v-else-if="qr[qrModal.sessionId]" class="bg-white p-3 rounded-xl shadow border">
+						<img :src="qr[qrModal.sessionId]" alt="WhatsApp QR Code" class="w-72 h-72"/>
+					</div>
+					<p class="mt-4 text-sm text-gray-600 text-center">
+						Open WhatsApp → Settings → Linked Devices → Link a Device → Scan this QR code
+					</p>
+				</div>
+			</div>
+		</div>
 		</template>
 	</div>
 </template>
@@ -406,6 +403,7 @@ const loading = ref(false)
 const loadingMessage = ref('')
 const notification = ref(null)
 const showModal = ref(false)
+const qrModal = reactive({ visible: false, sessionId: '' })
 
 // Simple env-based UI auth (frontend-only)
 const isAuthenticated = ref(false)
@@ -439,6 +437,19 @@ function openModal() {
 
 function closeModal() {
 	showModal.value = false
+}
+
+function openQrModal(id) {
+	qrModal.sessionId = id
+	qrModal.visible = true
+	// if QR not yet fetched, trigger generation
+	if (!qr[id] && !qrLoading[id]) {
+		loadQr(id)
+	}
+}
+
+function closeQrModal() {
+	qrModal.visible = false
 }
 
 function handleCreateSession(sessionName) {
@@ -586,14 +597,8 @@ async function addSession(sessionName) {
 
 	showLoading('Creating new session...')
 	try {
-		const response =await api.createSession(sessionName.trim())
-		// On success, start QR loading state for this session
+		await api.createSession(sessionName.trim())
 		await fetchAllData()
-		if (response && response.success) {
-			qrLoading[sessionName] = true // Start QR loading state
-		} else {
-			qrLoading[sessionName] = false
-		}
 		closeModal() // Close modal on success
 		showNotification(`Session "${sessionName}" created successfully!`)
 	} catch (err) {
@@ -732,17 +737,6 @@ async function fetchAllData() {
 		console.log('sessionsData: ', sessionsData);
 		sessions.value = sessionsData
 		healthData.value = healthPayload
-
-		if (sessionsData.length > 0) {
-			sessionsData.forEach(element => {
-				// Clear all QR codes if no sessions exist
-				if (element.id && !element.ready) {
-					qrLoading[element.id] = true
-				} else {
-					qrLoading[element.id] = false
-				}
-			});
-		}
 
 	} catch (err) {
 		// Fallback to individual calls if batch fails
