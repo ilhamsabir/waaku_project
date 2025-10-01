@@ -122,6 +122,11 @@ Open http://localhost:1100
 - The web UI/API is exposed on port 1100 (container listens on 3000)
 - Swagger docs: http://localhost:1100/api-docs
 
+Troubleshooting `connect_error UNAUTHORIZED`:
+- When building your own image, pass build args so Vite embeds the client key:
+  - `docker compose build --build-arg VITE_API_KEY=<raw> --build-arg VITE_API_BASE_URL=http://localhost:3000`
+- At runtime, set `WAAKU_API_KEY` to `sha512(<raw>)` so the server validates the same key.
+
 5) Log in to the dashboard
 
 - Use VITE_AUTH_USER and VITE_AUTH_PASS from your `.env`

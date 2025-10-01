@@ -103,7 +103,12 @@ Login to the dashboard with VITE_AUTH_USER/PASS. The UI uses X‑API‑Key autom
 Production‑like:
 
 ```bash
-docker compose up --build -d
+docker compose build \
+  --build-arg VITE_API_KEY=<raw_uuid_no_dashes> \
+  --build-arg VITE_API_BASE_URL=http://localhost:3000 \
+  --build-arg VITE_AUTH_USER=<user> \
+  --build-arg VITE_AUTH_PASS=<pass>
+docker compose up -d
 ```
 
 Open http://localhost:3000. Provide envs (WAAKU_API_KEY, optionally VITE vars) via compose or image environment.
@@ -140,6 +145,10 @@ Notes:
 - Set WAAKU_API_KEY to the SHA‑512 hash of that RAW UUID
 - The named volume `waaku_whatsapp_sessions` persists WhatsApp auth data
 - Access the UI at http://localhost:3000 and Swagger at http://localhost:3000/api-docs
+
+If you see `connect_error UNAUTHORIZED` in the browser console:
+- Ensure the image was built with a VITE_API_KEY embedded (build args above)
+- Ensure the container has WAAKU_API_KEY set to sha512(VITE_API_KEY)
 ```
 
 ## Usage guide

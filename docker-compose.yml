@@ -2,8 +2,13 @@ version: '3.8'
 
 services:
   waaku-app:
-    image: waaku-app:latest
-    build: .
+    build:
+      context: .
+      args:
+        VITE_API_KEY: ${VITE_API_KEY}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+        VITE_AUTH_USER: ${VITE_AUTH_USER}
+        VITE_AUTH_PASS: ${VITE_AUTH_PASS}
     container_name: waaku
     env_file:
       - .env
@@ -12,11 +17,19 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - WAAKU_RUNTIME=linux
       # API key configuration (server expects SHA-512 hash)
       # Set WAAKU_API_KEY to sha512(raw_uuid_key_without_dashes)
       # e.g., WAAKU_API_KEY=ab12... (128 hex chars)
       # - WAAKU_API_KEY=${WAAKU_API_KEY}
+      - FRONTEND_PORT=${FRONTEND_PORT}
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL}
+      - VITE_API_KEY=${VITE_API_KEY}
+      - WAAKU_API_KEY=${WAAKU_API_KEY}
+      - WAAKU_RUNTIME=${WAAKU_RUNTIME}
+      - VITE_AUTH_USER=${VITE_AUTH_USER}
+      - VITE_AUTH_PASS=${VITE_AUTH_PASS}
+      - VITE_API_DEV_PORT=${VITE_API_DEV_PORT}
+      - VITE_SOCKET_PORT=${VITE_SOCKET_PORT}
       - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
       - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
     volumes:
