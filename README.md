@@ -201,6 +201,20 @@ Note: The legacy endpoints under /api/sessions/:id/(validate|send) remain availa
 - Chromium/puppeteer issues in Docker: container uses chromium with stability flags and larger shm; see Dockerfile
 - Message send “Evaluation failed”: ensure number is in intl format (e.g., 62...) and exists; route resolves chatId with `getNumberId`
 
+## Health check
+
+You can verify the service is up with simple curl checks:
+
+```bash
+# General service health (200 when healthy)
+curl -f http://localhost:4300/health
+
+# Sessions health (200 = all healthy, 503 = some unhealthy)
+curl -i http://localhost:4300/api/sessions/health
+```
+
+These match the container healthcheck used in `docker-compose.yml`.
+
 ## Contributing
 
 PRs welcome! Suggested flow:

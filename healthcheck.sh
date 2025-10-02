@@ -5,8 +5,8 @@
 # This script is used by Docker to determine if the container is healthy
 
 # Configuration
-HEALTH_URL="http://localhost:3000/health"
-SESSIONS_HEALTH_URL="http://localhost:3000/api/sessions/health"
+HEALTH_URL="http://localhost:4300/health"
+SESSIONS_HEALTH_URL="http://localhost:4300/api/sessions/health"
 TIMEOUT=10
 
 # Function to check HTTP response

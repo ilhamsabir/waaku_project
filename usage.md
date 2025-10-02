@@ -260,6 +260,18 @@ docker run --rm -v waaku_whatsapp_sessions:/data -v $(pwd):/backup alpine \
   tar czf /backup/sessions-backup.tar.gz -C /data .
 ```
 
+### Health check
+
+Quick verification that the service is up:
+
+```bash
+# General health (expect HTTP/200)
+curl -f http://localhost:4300/health
+
+# Sessions health (HTTP/200 = all healthy, HTTP/503 = some unhealthy)
+curl -i http://localhost:4300/api/sessions/health
+```
+
 ### Scaling
 
 Waaku can manage multiple WhatsApp sessions in a single app instance. Start by scaling vertically, and only then consider horizontal scaling.
