@@ -1,13 +1,12 @@
 import { io } from 'socket.io-client'
+import { getApiBaseURL } from './baseUrl'
 
 let socket
 
 export function connectSocket() {
   if (socket && socket.connected) return socket
 
-  // In dev with Vite proxy, prefer window origin to avoid cross-origin socket conflicts
-  const isDev = import.meta.env.DEV
-  const baseURL = (isDev ? window.location.origin : import.meta.env.VITE_API_BASE_URL) || window.location.origin
+  const baseURL = getApiBaseURL()
   const token = import.meta.env.VITE_API_KEY
 
   socket = io(baseURL, {

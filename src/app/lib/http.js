@@ -1,9 +1,9 @@
 import axios from 'axios'
+import { getApiBaseURL } from './baseUrl'
 
 // Get API base URL and API key from environment variables
 // Prefer runtime origin so Docker/Nginx reverse proxies work without extra config
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL
-	|| (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'))
+const API_BASE_URL = getApiBaseURL()
 const API_KEY = import.meta.env.VITE_API_KEY
 
 if (!API_KEY) {
