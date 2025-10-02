@@ -48,7 +48,7 @@ RUN npm prune --production && npm cache clean --force
 RUN mkdir -p /usr/src/app/.wwebjs_auth
 
 # Expose port
-EXPOSE 3000
+EXPOSE 4300
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs

@@ -77,7 +77,8 @@ const frontendDir = path.resolve(__dirname, '../../dist')
 app.use(express.static(frontendDir, { maxAge: '1h', index: false }))
 
 // SPA fallback: send index.html for non-API routes
-app.get(/^\/(?!api|api-docs|health).*/, (req, res) => {
+// Exclude socket.io, api-docs, and health endpoints
+app.get(/^\/(?!api|api-docs|health|socket\.io).*/, (req, res) => {
 	res.sendFile(path.join(frontendDir, 'index.html'))
 })
 
@@ -85,7 +86,7 @@ app.get(/^\/(?!api|api-docs|health).*/, (req, res) => {
 const io = initSocketIO(server)
 module.exports.io = io
 
-const port = Number(process.env.VITE_API_DEV_PORT || 3000)
+const port = Number(process.env.PORT || process.env.VITE_API_DEV_PORT || 4300)
 server.listen(port, () => console.log(`Server running at http://localhost:${port}`))
 
 server.on('error', (err) => {
@@ -93,6 +94,6 @@ server.on('error', (err) => {
 		console.error(`\nPort ${port} is already in use.`)
 		console.error('Tips:')
 		console.error('- Stop the process using that port, or')
-		console.error('- Run: PORT=3001 VITE_API_DEV_PORT=3001 npm run dev (or use "npm run dev:3001")')
+		console.error('- Run: PORT=4301 VITE_API_DEV_PORT=4301 npm run dev (or use "npm run dev:4301")')
 	}
 })

@@ -21,13 +21,13 @@ Quickest way to get started without cloning the repo:
 docker pull ilhamsabir/waaku-app:latest
 docker run -d \
   --name waaku \
-  -p 3000:3000 \
+  -p 4300:4300 \
   --shm-size=1g \
   -e NODE_ENV=production \
-  -e PORT=3000 \
+  -e PORT=4300 \
   -e WAAKU_RUNTIME=linux \
   -e PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-  -e PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
+  -e PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
   -e WAAKU_API_KEY=<sha512_of_raw_uuid> \
   -e VITE_API_KEY=<raw_uuid_no_dashes> \
   -v waaku_whatsapp_sessions:/usr/src/app/.wwebjs_auth \
@@ -44,13 +44,13 @@ services:
     image: ilhamsabir/waaku-app:latest
     container_name: waaku
     ports:
-      - "3000:3000"
+  - "4300:4300"
     environment:
       - NODE_ENV=production
-      - PORT=3000
+  - PORT=4300
       - WAAKU_RUNTIME=linux
       - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+  - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
       - WAAKU_API_KEY=${WAAKU_API_KEY}
       - VITE_API_KEY=${VITE_API_KEY}
     volumes:
@@ -95,7 +95,7 @@ RAW=$(uuidgen | tr -d '-') && echo "Raw: $RAW" && echo -n "$RAW" | shasum -a 512
 3) Edit `.env` and set at least:
 
 ```
-VITE_API_BASE_URL=http://localhost:3000
+VITE_API_BASE_URL=http://localhost:4300
 VITE_API_KEY=<paste RAW here>
 WAAKU_API_KEY=<paste SHA512 hash here>
 
@@ -104,7 +104,7 @@ VITE_AUTH_USER=admin
 VITE_AUTH_PASS=admin
 
 # Ports (change only if needed)
-PORT=3000
+PORT=4300
 FRONTEND_PORT=1100
 
 # Runtime (linux for Docker; use mac for local non‑Docker macOS)
@@ -119,12 +119,12 @@ docker compose up --build -d
 
 Open http://localhost:1100
 
-- The web UI/API is exposed on port 1100 (container listens on 3000)
-- Swagger docs: http://localhost:1100/api-docs
+- The API runs on port 4300 in the container and on the host.
+- Swagger docs: http://localhost:4300/api-docs
 
 Troubleshooting `connect_error UNAUTHORIZED`:
 - When building your own image, pass build args so Vite embeds the client key:
-  - `docker compose build --build-arg VITE_API_KEY=<raw> --build-arg VITE_API_BASE_URL=http://localhost:3000`
+  - `docker compose build --build-arg VITE_API_KEY=<raw> --build-arg VITE_API_BASE_URL=http://localhost:4300`
 - At runtime, set `WAAKU_API_KEY` to `sha512(<raw>)` so the server validates the same key.
 
 5) Log in to the dashboard
@@ -169,7 +169,7 @@ npm install
 npm run dev
 ```
 
-Open the Vite URL (default http://localhost:1100) for the UI, and http://localhost:3000 for the API.
+Open the Vite URL (default http://localhost:1100) for the UI, and http://localhost:4300 for the API.
 
 ## Using the API (optional)
 
@@ -180,7 +180,7 @@ Examples:
 Create a session:
 
 ```bash
-curl -X POST http://localhost:3000/api/sessions \
+curl -X POST http://localhost:4300/api/sessions \
   -H 'Content-Type: application/json' \
   -H 'X-API-Key: <RAW-UUIDv4-no-dashes>' \
   -d '{"id":"mybot"}'
@@ -189,14 +189,14 @@ curl -X POST http://localhost:3000/api/sessions \
 Check QR (returns data URL):
 
 ```bash
-curl -X GET http://localhost:3000/api/sessions/mybot/qr \
+curl -X GET http://localhost:4300/api/sessions/mybot/qr \
   -H 'X-API-Key: <RAW-UUIDv4-no-dashes>'
 ```
 
 Validate a number:
 
 ```bash
-curl -X POST http://localhost:3000/api/sessions/mybot/validate \
+curl -X POST http://localhost:4300/api/sessions/mybot/validate \
   -H 'Content-Type: application/json' \
   -H 'X-API-Key: <RAW-UUIDv4-no-dashes>' \
   -d '{"to":"62XXXXXXXXXX"}'
@@ -205,7 +205,7 @@ curl -X POST http://localhost:3000/api/sessions/mybot/validate \
 Send a message:
 
 ```bash
-curl -X POST http://localhost:3000/api/sessions/mybot/send \
+curl -X POST http://localhost:4300/api/sessions/mybot/send \
   -H 'Content-Type: application/json' \
   -H 'X-API-Key: <RAW-UUIDv4-no-dashes>' \
   -d '{"to":"62XXXXXXXXXX","message":"Halo dari Waaku"}'
@@ -214,19 +214,19 @@ curl -X POST http://localhost:3000/api/sessions/mybot/send \
 List sessions:
 
 ```bash
-curl -H 'X-API-Key: <RAW-UUIDv4-no-dashes>' http://localhost:3000/api/sessions
+curl -H 'X-API-Key: <RAW-UUIDv4-no-dashes>' http://localhost:4300/api/sessions
 ```
 
 Health:
 
 ```bash
-curl -H 'X-API-Key: <RAW-UUIDv4-no-dashes>' http://localhost:3000/api/sessions/health
+curl -H 'X-API-Key: <RAW-UUIDv4-no-dashes>' http://localhost:4300/api/sessions/health
 ```
 
 Rotate API key (admin helper):
 
 ```bash
-curl -X POST http://localhost:3000/admin/generate-api-key \
+curl -X POST http://localhost:4300/admin/generate-api-key \
   -H 'X-API-Key: <current-RAW-key>'
 ```
 
@@ -282,7 +282,7 @@ Waaku can manage multiple WhatsApp sessions in a single app instance. Start by s
       build: .
       environment:
         - NODE_ENV=production
-        - PORT=3000
+        - PORT=4300
         - WAAKU_RUNTIME=linux
         # - WAAKU_API_KEY=${WAAKU_API_KEY}
         - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
@@ -304,8 +304,8 @@ Waaku can manage multiple WhatsApp sessions in a single app instance. Start by s
   ```nginx
   upstream whatsapp_app {
       ip_hash;  # sticky per client IP for Socket.IO
-  server waaku-app:3000;
-  server waaku-app-2:3000;
+  server waaku-app:4300;
+  server waaku-app-2:4300;
   }
   ```
 
@@ -332,7 +332,7 @@ Notes:
   - RAW key (VITE_API_KEY) must match the SHA‑512 hash (WAAKU_API_KEY) on the server
   - Check browser devtools and server logs
 
-- Port already in use (3000):
+- Port already in use (4300):
   - Change `PORT` in `.env` and the published port in `docker-compose.yml`, then re‑up
 
 - QR not showing:
@@ -344,5 +344,5 @@ Notes:
 
 ## Where to get help
 
-- Swagger docs at http://localhost:3000/api-docs for API details
+- Swagger docs at http://localhost:4300/api-docs for API details
 - Open an issue in the repository if you find a bug or need a feature

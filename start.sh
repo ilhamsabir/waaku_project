@@ -35,9 +35,9 @@ fi
 
 case $MODE in
     "start")
-        echo "📦 Starting in production mode..."
-        docker-compose up -d
-        echo "✅ Application started at http://localhost:3000"
+    echo "📦 Starting in production mode..."
+    docker-compose up -d
+    echo "✅ Application started at http://localhost:4300"
         ;;
     "stop")
         echo "⏹️  Stopping application..."
@@ -51,7 +51,7 @@ case $MODE in
         ;;
     "logs")
         echo "📋 Showing application logs..."
-        docker-compose logs -f
+    docker-compose logs -f
         ;;
     "build")
         echo "🔨 Rebuilding application..."

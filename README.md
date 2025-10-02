@@ -53,7 +53,7 @@ vite.config.js, tailwind.config.js
 - CPU: 1 vCPU minimum; 2+ vCPU recommended for 5–10 active sessions
 - RAM: 1.5 GB minimum for a few sessions; 2–4 GB recommended; increase for heavy use
 - Disk: 1 GB free for app + growth for WhatsApp auth data per session
-- Network: stable internet connectivity; open ports 1100 (app/API via Docker), optionally 80/443 (via Nginx)
+- Network: stable internet connectivity; open ports 4300 (app/API), optionally 80/443 (via Nginx)
 - Docker: shared memory size (shm) ≥ 1 GB for Chromium stability (already set in compose)
 
 ## Quick start (local)
@@ -66,7 +66,7 @@ cp .env.example .env
 
 Set these variables (see .env.example for all):
 
-- VITE_API_BASE_URL=http://localhost:3000 (or omit to use window origin)
+- VITE_API_BASE_URL=http://localhost:4300 (or omit to use window origin)
 - VITE_API_KEY=<raw UUIDv4 without dashes>
 - WAAKU_API_KEY=<sha512 hash of the raw key>
 - VITE_AUTH_USER=<dashboard user>
@@ -86,15 +86,15 @@ npm run dev
 
 What it does:
 
-- Frees port 3000 if busy (predev hook)
+- Frees port 4300 if busy (predev hook)
 - Starts Vite (default 1100, respects VITE_PORT)
-- Starts Express API on 3000 with Socket.IO
+- Starts Express API on 4300 with Socket.IO
 
 Open:
 
 - App: http://localhost:1100 (or whichever Vite chooses)
-- API: http://localhost:3000
-- Swagger: http://localhost:3000/api-docs
+- API: http://localhost:4300
+- Swagger: http://localhost:4300/api-docs
 
 Login to the dashboard with VITE_AUTH_USER/PASS. The UI uses X‑API‑Key automatically via Axios.
 
@@ -105,13 +105,13 @@ Production‑like:
 ```bash
 docker compose build \
   --build-arg VITE_API_KEY=<raw_uuid_no_dashes> \
-  --build-arg VITE_API_BASE_URL=http://localhost:3000 \
+  --build-arg VITE_API_BASE_URL=http://localhost:4300 \
   --build-arg VITE_AUTH_USER=<user> \
   --build-arg VITE_AUTH_PASS=<pass>
 docker compose up -d
 ```
 
-Open http://localhost:3000. Provide envs (WAAKU_API_KEY, optionally VITE vars) via compose or image environment.
+Open http://localhost:4300. Provide envs (WAAKU_API_KEY, optionally VITE vars) via compose or image environment.
 
 Development (local, no Docker):
 
@@ -127,13 +127,13 @@ You can pull and run the prebuilt image without cloning the repo:
 docker pull ilhamsabir/waaku-app:latest
 docker run -d \
   --name waaku \
-  -p 3000:3000 \
+  -p 4300:4300 \
   --shm-size=1g \
   -e NODE_ENV=production \
-  -e PORT=3000 \
+  -e PORT=4300 \
   -e WAAKU_RUNTIME=linux \
   -e PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-  -e PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
+  -e PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
   -e WAAKU_API_KEY=<sha512_of_raw_uuid> \
   -e VITE_API_KEY=<raw_uuid_no_dashes> \
   -v waaku_whatsapp_sessions:/usr/src/app/.wwebjs_auth \
@@ -144,7 +144,7 @@ Notes:
 - Set VITE_API_KEY to the RAW UUID (32 hex chars, no dashes)
 - Set WAAKU_API_KEY to the SHA‑512 hash of that RAW UUID
 - The named volume `waaku_whatsapp_sessions` persists WhatsApp auth data
-- Access the UI at http://localhost:3000 and Swagger at http://localhost:3000/api-docs
+- Access the UI at http://localhost:4300 and Swagger at http://localhost:4300/api-docs
 
 If you see `connect_error UNAUTHORIZED` in the browser console:
 - Ensure the image was built with a VITE_API_KEY embedded (build args above)
@@ -196,7 +196,7 @@ Note: The legacy endpoints under /api/sessions/:id/(validate|send) remain availa
 
 ## Troubleshooting
 
-- EADDRINUSE on 3000: set a different port and rerun, e.g. `npm run dev:3001` or set `PORT`/`VITE_API_DEV_PORT` in `.env`
+- EADDRINUSE on 4300: set a different port and rerun, e.g. `npm run dev:4301` or set `PORT`/`VITE_API_DEV_PORT` in `.env`
 - Socket connect_error: ensure VITE_API_KEY (raw UUID) matches WAAKU_API_KEY (sha512) server hash
 - Chromium/puppeteer issues in Docker: container uses chromium with stability flags and larger shm; see Dockerfile
 - Message send “Evaluation failed”: ensure number is in intl format (e.g., 62...) and exists; route resolves chatId with `getNumberId`
@@ -223,7 +223,7 @@ MIT License. See LICENSE file if present; otherwise, contributions are assumed M
 
 ## Support
 
-base_url: http://localhost:3000
+base_url: http://localhost:4300
 session_id: test-session
 phone_number: 6281234567890
 message_text: Hello from API!
@@ -254,19 +254,19 @@ message_text: Hello from API!
 
 ```bash
 # Create a new session
-curl -X POST http://localhost:3000/api/sessions \
+curl -X POST http://localhost:4300/api/sessions \
   -H "Content-Type: application/json" \
   -H "X-API-Key: <your-raw-uuidv4>" \
   -d '{"id": "session1"}'
 
 # Validate a number
-curl -X POST http://localhost:3000/api/sessions/session1/validate \
+curl -X POST http://localhost:4300/api/sessions/session1/validate \
   -H "Content-Type: application/json" \
   -H "X-API-Key: <your-raw-uuidv4>" \
   -d '{"to": "6281234567890"}'
 
 # Send a message
-curl -X POST http://localhost:3000/api/sessions/session1/send \
+curl -X POST http://localhost:4300/api/sessions/session1/send \
   -H "Content-Type: application/json" \
   -H "X-API-Key: <your-raw-uuidv4>" \
   -d '{"to": "6281234567890", "message": "Hello World!"}'

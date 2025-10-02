@@ -14,25 +14,24 @@ services:
     env_file:
       - .env
     ports:
-      - "3000:3000"
+      - "4300:4300"
     environment:
-      - NODE_ENV=production
-      - PORT=3000
+      NODE_ENV: production
+      PORT: 4300
       # API key configuration (server expects SHA-512 hash)
       # Set WAAKU_API_KEY to sha512(raw_uuid_key_without_dashes)
       # e.g., WAAKU_API_KEY=ab12... (128 hex chars)
-      # - WAAKU_API_KEY=${WAAKU_API_KEY}
-      - FRONTEND_PORT=${FRONTEND_PORT}
-      - VITE_API_BASE_URL=${VITE_API_BASE_URL}
-      - VITE_API_KEY=${VITE_API_KEY}
-      - WAAKU_API_KEY=${WAAKU_API_KEY}
-      - WAAKU_RUNTIME=${WAAKU_RUNTIME}
-      - VITE_AUTH_USER=${VITE_AUTH_USER}
-      - VITE_AUTH_PASS=${VITE_AUTH_PASS}
-      - VITE_API_DEV_PORT=${VITE_API_DEV_PORT}
-      - VITE_SOCKET_PORT=${VITE_SOCKET_PORT}
-      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+      FRONTEND_PORT: ${FRONTEND_PORT}
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+      VITE_API_KEY: ${VITE_API_KEY}
+      WAAKU_API_KEY: ${WAAKU_API_KEY}
+      WAAKU_RUNTIME: ${WAAKU_RUNTIME}
+      VITE_AUTH_USER: ${VITE_AUTH_USER}
+      VITE_AUTH_PASS: ${VITE_AUTH_PASS}
+      VITE_API_DEV_PORT: ${VITE_API_DEV_PORT}
+      VITE_SOCKET_PORT: ${VITE_SOCKET_PORT}
+      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
+      PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium
     volumes:
       # Persist WhatsApp session data
       - whatsapp_sessions:/usr/src/app/.wwebjs_auth
@@ -43,7 +42,7 @@ services:
     networks:
       - waaku-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      test: ["CMD", "curl", "-f", "http://localhost:4300"]
       interval: 30s
       timeout: 10s
       retries: 3
