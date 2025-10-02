@@ -22,8 +22,8 @@ function buildPuppeteerOptions() {
 		'--disable-dev-shm-usage',
 		'--disable-gpu',
 		'--no-zygote',
-		'--user-data-dir=/tmp/chrome',
-		'--remote-debugging-port=9222',
+		// Avoid sharing a user data dir across processes to prevent SingletonLock errors
+		// Let Chromium pick a temp profile per process
 	]
 
 	const macArgs = [
