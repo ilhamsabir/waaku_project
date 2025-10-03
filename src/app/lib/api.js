@@ -109,6 +109,34 @@ export const sendMessage = async (sessionId, phoneNumber, message) => {
 	return response.data
 }
 
+// ===== AUTH (UI) =====
+
+/**
+ * Login to UI (sets httpOnly cookie)
+ * @param {string} username
+ * @param {string} password
+ */
+export const login = async (username, password) => {
+	const response = await http.post('/auth/login', { username, password })
+	return response.data
+}
+
+/**
+ * Logout from UI (clears cookie)
+ */
+export const logout = async () => {
+	const response = await http.post('/auth/logout')
+	return response.data
+}
+
+/**
+ * Check current UI auth state
+ */
+export const me = async () => {
+	const response = await http.get('/auth/me')
+	return response.data
+}
+
 // ===== BATCH OPERATIONS =====
 
 /**
@@ -182,6 +210,11 @@ export default {
 	// Messaging
 	validatePhoneNumber,
 	sendMessage,
+
+	// Auth
+	login,
+	logout,
+	me,
 
 	// Batch
 	getSessionsWithHealth,

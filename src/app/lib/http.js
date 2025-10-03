@@ -14,6 +14,7 @@ if (!API_KEY) {
 const http = axios.create({
 	baseURL: API_BASE_URL,
 	timeout: 30000, // 30 seconds timeout
+	withCredentials: true,
 	headers: {
 		'Content-Type': 'application/json',
 		'Accept': 'application/json',

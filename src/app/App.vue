@@ -407,13 +407,11 @@ const notification = ref(null)
 const showModal = ref(false)
 const qrModal = reactive({ visible: false, sessionId: '' })
 
-// Simple env-based UI auth (frontend-only)
+// Cookie-based UI auth (server-backed)
 const isAuthenticated = ref(false)
 const loginUser = ref('')
 const loginPass = ref('')
 const authError = ref('')
-const AUTH_USER = import.meta.env.VITE_AUTH_USER || ''
-const AUTH_PASS = import.meta.env.VITE_AUTH_PASS || ''
 
 // Helper functions
 function showNotification(message, type = 'success') {
@@ -577,23 +575,23 @@ function initAfterAuth() {
 	}
 }
 
-function tryLogin() {
+async function tryLogin() {
 	authError.value = ''
-	if (!AUTH_USER || !AUTH_PASS) {
-		authError.value = 'Auth is not configured on this build'
+	if (!loginUser.value || !loginPass.value) {
+		authError.value = 'Please enter username and password'
 		return
 	}
-	if (loginUser.value === AUTH_USER && loginPass.value === AUTH_PASS) {
+	try {
+		await api.login(loginUser.value, loginPass.value)
 		isAuthenticated.value = true
-		try { localStorage.setItem('waaku_auth', '1') } catch {}
 		initAfterAuth()
-	} else {
-		authError.value = 'Invalid username or password'
+	} catch (e) {
+		authError.value = e.message || 'Login failed'
 	}
 }
 
-function logout() {
-	try { localStorage.removeItem('waaku_auth') } catch {}
+async function logout() {
+	try { await api.logout() } catch {}
 	isAuthenticated.value = false
 	if (detachSockets) {
 		detachSockets()
@@ -602,12 +600,14 @@ function logout() {
 }
 
 // Initialize
-onMounted(() => {
-    const authed = (typeof window !== 'undefined') && localStorage.getItem('waaku_auth') === '1'
-    if (authed) {
-        isAuthenticated.value = true
-        initAfterAuth()
-    }
+onMounted(async () => {
+	try {
+		const data = await api.me()
+		if (data?.authenticated) {
+			isAuthenticated.value = true
+			initAfterAuth()
+		}
+	} catch {}
 })
 
 // --- Data fetchers (HTTP) ---

@@ -9,12 +9,16 @@ function initSocketIO(server) {
   const WAAKU_API_KEY = process.env.WAAKU_API_KEY
 
   io = new Server(server, {
-    cors: { origin: '*', methods: ['GET', 'POST'] }
+    cors: { origin: '*', methods: ['GET', 'POST'] },
+    cookie: true,
   })
 
-  // API-key based auth (UUID4 -> SHA-512 compare)
+  // API-key based auth (UUID4 -> SHA-512 compare) + require UI cookie for dashboards
   io.use((socket, next) => {
     try {
+      const cookieHeader = socket.handshake.headers.cookie || ''
+      const hasUiCookie = /(?:^|;\s*)waaku_ui=/.test(cookieHeader)
+      if (!hasUiCookie) return next(new Error('UNAUTHORIZED'))
       const providedKey = socket.handshake.auth?.token || socket.handshake.headers['x-api-key']
       if (!providedKey || !/^[a-f0-9]{32}$/.test(providedKey)) {
         return next(new Error('UNAUTHORIZED'))
