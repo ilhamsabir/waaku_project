@@ -211,27 +211,8 @@ curl -i http://localhost:4300/api/sessions/health
 
 These match the container healthcheck used in `docker-compose.yml`.
 
-## Contributing
 
-PRs welcome! Suggested flow:
-
-1. Fork and create a feature branch
-2. Keep changes focused; add/update docs and small tests where possible
-3. Follow existing code style and structure
-4. Open a PR with a concise summary and screenshots/logs when relevant
-
-Areas to improve:
-
-- Add automated tests (unit/integration)
-- Improve session lifecycle UX and metrics
-- Pluggable auth providers for the UI login
-- External rate‑limit store (Redis) for multi‑instance prod
-
-## License
-
-MIT License. See LICENSE file if present; otherwise, contributions are assumed MIT under this repository.
-
-## Support
+## API Endpoint Docs
 
 base_url: http://localhost:4300
 session_id: test-session
@@ -284,15 +265,26 @@ curl -X POST http://localhost:4300/api/sessions/session1/send \
 
 ## 🤝 Contributing
 
+PRs welcome! Suggested flow:
+
+1. Fork and create a feature branch
+2. Keep changes focused; add/update docs and small tests where possible
+3. Follow existing code style and structure
+4. Open a PR with a concise summary and screenshots/logs when relevant
+
+Areas to improve:
+
+- Add automated tests (unit/integration)
+- Improve session lifecycle UX and metrics
+- Pluggable auth providers for the UI login
+- External rate‑limit store (Redis) for multi‑instance prod
+
 1. Fork the repository
 2. Create feature branch (`git checkout -b feature/AmazingFeature`)
 3. Commit changes (`git commit -m 'Add AmazingFeature'`)
 4. Push to branch (`git push origin feature/AmazingFeature`)
 5. Open Pull Request
 
-## 📄 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
 
 ## 📞 Support
 
