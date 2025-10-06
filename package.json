@@ -1,6 +1,9 @@
 {
-	"name": "whatsapp-multi",
+	"name": "waaku-project",
 	"private": true,
+	"version": "0.0.1",
+	"author": "",
+	"license": "UNLICENSED",
 	"engines": {
 		"node": ">=18"
 	},
