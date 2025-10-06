@@ -10,20 +10,29 @@
 
 const crypto = require('crypto')
 
-// Load hashed API key from environment (SHA-512 hash)
-const WAAKU_API_KEY = process.env.WAAKU_API_KEY
-
-if (!WAAKU_API_KEY) {
-	console.error('❌ WAAKU_API_KEY not found in environment variables!')
-	console.error('💡 Generate with: echo -n "your-uuid-without-dashes" | shasum -a 512')
-	process.exit(1)
+// Normalize stored API key (accepts optional 'sha512:' prefix) or derive from VITE_API_KEY
+function resolveStoredApiKey() {
+	let key = (process.env.WAAKU_API_KEY || '').trim()
+	if (key.toLowerCase().startsWith('sha512:')) {
+		key = key.slice(7)
+	}
+	key = key.toLowerCase()
+	if (!key) {
+		const raw = (process.env.VITE_API_KEY || '').trim()
+		if (/^[a-f0-9]{32}$/i.test(raw)) {
+			const rawNormalized = raw.toLowerCase()
+			key = crypto.createHash('sha512').update(rawNormalized).digest('hex')
+			console.warn('[AUTH] WAAKU_API_KEY not set; derived from VITE_API_KEY at runtime')
+		}
+	}
+	if (!/^[a-f0-9]{128}$/.test(key)) {
+		console.error('❌ WAAKU_API_KEY must be a valid SHA-512 hash (128 hex characters) or provide VITE_API_KEY (UUID4 without dashes) to derive it')
+		process.exit(1)
+	}
+	return key
 }
 
-// Validate that the stored key is a proper SHA-512 hash (128 hex chars)
-if (!WAAKU_API_KEY.match(/^[a-f0-9]{128}$/)) {
-	console.error('❌ WAAKU_API_KEY must be a valid SHA-512 hash (128 hex characters)')
-	process.exit(1)
-}
+const WAAKU_API_KEY = resolveStoredApiKey()
 
 // Generate SHA-512 hash from raw UUID4 key
 const getSecureHash = (rawKey) => {
@@ -52,8 +61,8 @@ const validateApiKey = (req, res, next) => {
 		})
 	}
 
-	// Validate UUID4 format (32 hex chars without dashes)
-	if (!providedKey.match(/^[a-f0-9]{32}$/)) {
+	// Validate UUID4 format (32 hex chars without dashes), case-insensitive
+	if (!/^[a-f0-9]{32}$/i.test(providedKey)) {
 		return res.status(401).json({
 			success: false,
 			error: 'Invalid X-API-Key format',
@@ -63,7 +72,7 @@ const validateApiKey = (req, res, next) => {
 	}
 
 	// Hash the provided UUID4 key and compare with stored SHA-512 hash
-	const providedKeyHash = getSecureHash(providedKey)
+	const providedKeyHash = getSecureHash(providedKey.toLowerCase())
 	const providedHashBuffer = Buffer.from(providedKeyHash, 'hex')
 	const storedHashBuffer = Buffer.from(WAAKU_API_KEY, 'hex')
 

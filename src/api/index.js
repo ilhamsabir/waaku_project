@@ -22,6 +22,13 @@ app.use(helmet({
 	crossOriginResourcePolicy: { policy: 'cross-origin' }
 }))
 
+// Trust proxy (needed when running behind nginx to ensure secure cookies behave correctly)
+// Set TRUST_PROXY to the number of hops (default 1 when behind a single reverse proxy)
+const TRUST_PROXY = process.env.TRUST_PROXY
+if (TRUST_PROXY) {
+  app.set('trust proxy', Number.isNaN(Number(TRUST_PROXY)) ? true : Number(TRUST_PROXY))
+}
+
 // Configurable CORS (comma-separated origins in CORS_ORIGINS), defaults to allow all
 const corsOrigins = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',').map(s => s.trim()) : '*'
 const corsOptions = corsOrigins === '*' ? {} : { origin: corsOrigins, credentials: true }
@@ -70,44 +77,11 @@ app.get('/api', (req, res) => {
 	res.redirect('/api-docs')
 })
 
-// Simple cookie-based UI auth (optional). In production use a proper session store.
-const UI_COOKIE_NAME = 'waaku_ui'
-const UI_COOKIE_OPTS = {
-	httpOnly: true,
-	sameSite: 'lax',
-	secure: process.env.NODE_ENV === 'production',
-	maxAge: 60 * 60 * 8, // 8h
-}
+// UI auth removed - app now loads directly without login
 
-function credentialsValid(user, pass) {
-	const u = process.env.VITE_AUTH_USER || ''
-	const p = process.env.VITE_AUTH_PASS || ''
-	if (!u || !p) return false
-	if (p.startsWith('bcrypt:')) {
-		const hash = p.replace(/^bcrypt:/, '')
-		console.log('hash: ', hash);
-		return user === u && bcrypt.compareSync(pass, hash)
-	}
-	return user === u && pass === p
-}
+// credentialsValid function removed - no longer needed
 
-app.post('/auth/login', (req, res) => {
-	const { username, password } = req.body || {}
-	if (!username || !password) return res.status(400).json({ ok: false, error: 'Missing credentials' })
-	if (!credentialsValid(username, password)) return res.status(401).json({ ok: false, error: 'Invalid credentials' })
-	res.cookie(UI_COOKIE_NAME, '1', UI_COOKIE_OPTS)
-	res.json({ ok: true })
-})
-
-app.post('/auth/logout', (req, res) => {
-	res.clearCookie(UI_COOKIE_NAME, UI_COOKIE_OPTS)
-	res.json({ ok: true })
-})
-
-app.get('/auth/me', (req, res) => {
-	const authed = !!req.cookies[UI_COOKIE_NAME]
-	res.json({ ok: true, authenticated: authed })
-})
+// Auth endpoints removed - no longer needed
 
 // API routes (protected by API key)
 app.use('/api', validateApiKey)

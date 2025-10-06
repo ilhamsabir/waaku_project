@@ -12,7 +12,7 @@ Manage multiple WhatsApp sessions with a modern Vue 3 UI, secure Express API, re
 - QR login flow, live status, health dashboard
 - Real‑time UI (Socket.IO) — no polling
 - Secure API with X‑API‑Key (UUIDv4 raw on client, SHA‑512 hash on server)
-- Frontend UI login (env-based) for dashboard access
+- Direct dashboard access (no login required)
 - Docker and docker‑compose for dev and prod
 
 ## Tech Stack
@@ -32,7 +32,7 @@ src/
     socket.js           # Socket.IO server with API-key auth (handshake)
     whatsapp/session.js # WhatsApp client lifecycle + socket emits
   app/
-    App.vue             # Main Vue app (now with env-based login)
+    App.vue             # Main Vue app (direct dashboard access)
     main.js, assets/css/tailwind.css, components/
     lib/http.js         # Axios with X-API-Key header
     lib/api.js          # API wrapper
@@ -69,8 +69,6 @@ Set these variables (see .env.example for all):
 - VITE_API_BASE_URL=http://localhost:4300 (or omit to use window origin)
 - VITE_API_KEY=<raw UUIDv4 without dashes>
 - WAAKU_API_KEY=<sha512 hash of the raw key>
-- VITE_AUTH_USER=<dashboard user>
-- VITE_AUTH_PASS=<dashboard pass>
 
 Generate values:
 
@@ -96,7 +94,7 @@ Open:
 - API: http://localhost:4300
 - Swagger: http://localhost:4300/api-docs
 
-Login to the dashboard with VITE_AUTH_USER/PASS. The UI uses X‑API‑Key automatically via Axios.
+Login to the dashboard with AUTH_USER/PASS. The UI uses X‑API‑Key automatically via Axios.
 
 ## Quick start (Docker)
 
@@ -105,13 +103,11 @@ Production‑like:
 ```bash
 docker compose build \
   --build-arg VITE_API_KEY=<raw_uuid_no_dashes> \
-  --build-arg VITE_API_BASE_URL=http://localhost:4300 \
-  --build-arg VITE_AUTH_USER=<user> \
-  --build-arg VITE_AUTH_PASS=<pass>
+  --build-arg VITE_API_BASE_URL=http://localhost:4300
 docker compose up -d
 ```
 
-Open http://localhost:4300. Provide envs (WAAKU_API_KEY, optionally VITE vars) via compose or image environment.
+Open http://localhost:4300. Provide envs via .env/compose.
 
 Development (local, no Docker):
 

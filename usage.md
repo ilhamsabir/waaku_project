@@ -46,13 +46,13 @@ services:
     ports:
   - "4300:4300"
     environment:
-      - NODE_ENV=production
-  - PORT=4300
-      - WAAKU_RUNTIME=linux
-      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-  - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-      - WAAKU_API_KEY=${WAAKU_API_KEY}
-      - VITE_API_KEY=${VITE_API_KEY}
+      NODE_ENV: production
+      PORT: 4300
+      WAAKU_RUNTIME: linux
+      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
+      PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium
+      WAAKU_API_KEY: ${WAAKU_API_KEY}
+      VITE_API_KEY: ${VITE_API_KEY}
     volumes:
       - waaku_whatsapp_sessions:/usr/src/app/.wwebjs_auth
     restart: unless-stopped
@@ -98,10 +98,6 @@ RAW=$(uuidgen | tr -d '-') && echo "Raw: $RAW" && echo -n "$RAW" | shasum -a 512
 VITE_API_BASE_URL=http://localhost:4300
 VITE_API_KEY=<paste RAW here>
 WAAKU_API_KEY=<paste SHA512 hash here>
-
-# Login for the dashboard UI
-VITE_AUTH_USER=admin
-VITE_AUTH_PASS=admin
 
 # Ports (change only if needed)
 PORT=4300
@@ -153,7 +149,7 @@ Prerequisites: Node.js 18+
 
 ```bash
 cp .env.example .env
-# Set VITE_API_KEY (raw), WAAKU_API_KEY (sha512), VITE_AUTH_USER/PASS
+# Set VITE_API_KEY (raw), WAAKU_API_KEY (sha512)
 ```
 
 2) For macOS local run, set:
@@ -340,7 +336,7 @@ Notes:
 
 ## Common issues
 
-- Socket connect error on login or dashboard stays empty:
+- Socket connect error or dashboard stays empty:
   - RAW key (VITE_API_KEY) must match the SHA‑512 hash (WAAKU_API_KEY) on the server
   - Check browser devtools and server logs
 
