@@ -12,6 +12,23 @@ WEBHOOK_URL=https://your-domain.com/webhook
 WEBHOOK_SECRET=your-optional-secret
 ```
 
+### Testing Webhooks Locally
+
+1. **Start the example webhook server:**
+   ```bash
+   node examples/webhook-example.js
+   # This runs a test server on http://localhost:3001
+   ```
+
+2. **Configure Waaku to use the test webhook:**
+   ```bash
+   # Add to your .env
+   WEBHOOK_URL=http://localhost:3001/webhook
+   WEBHOOK_SECRET=test-secret
+   ```
+
+3. **Create a session and send messages to test webhook delivery**
+
 Your webhook endpoint will receive POST requests with JSON payloads containing message data, contact information, and chat details. See the main README.md for detailed webhook payload examples.
 
 ## Alternative: Local run (no Docker)king dashboard, create WhatsApp sessions, scan QR codes, and send messages.
@@ -119,6 +136,13 @@ FRONTEND_PORT=1100
 
 # Runtime (linux for Docker; use mac for local non‑Docker macOS)
 WAAKU_RUNTIME=linux
+
+# Optional: Webhook for message notifications
+WEBHOOK_URL=https://your-domain.com/webhook
+WEBHOOK_SECRET=your-secret-key
+
+# Optional: Custom Chrome path (macOS only, auto-detected by default)
+# WAAKU_CHROME_PATH=/Applications/Google Chrome.app/Contents/MacOS/Google Chrome
 ```
 
 4) Start the stack
@@ -168,8 +192,16 @@ cp .env.example .env
 
 2) For macOS local run, set:
 
-```
+```bash
+# Required for macOS
 WAAKU_RUNTIME=mac
+
+# Optional: Custom Chrome path if not in default location
+# WAAKU_CHROME_PATH=/Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+
+# Optional: Webhook notifications
+# WEBHOOK_URL=http://localhost:3001/webhook
+# WEBHOOK_SECRET=optional-secret
 ```
 
 3) Install and run

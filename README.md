@@ -8,7 +8,14 @@ Manage multiple WhatsApp sessions with a modern Vue 3 UI, secure Express API, re
 
 ## Highlights
 
-- Multi‑session WhatsApp management (whatsapp-web.js)
+- Multi‑session WhatsApp manageme## Troubleshooting
+
+- EADDRINUSE on 4300: set a different port and rerun, e.g. `npm run dev:4301` or set `PORT`/`VITE_API_DEV_PORT` in `.env`
+- Socket connect_error: ensure VITE_API_KEY (raw UUID) matches WAAKU_API_KEY (sha512) server hash
+- Chromium/puppeteer issues in Docker: container uses chromium with stability flags and larger shm; see Dockerfile
+- Message send "Evaluation failed": ensure number is in intl format (e.g., 62...) and exists; route resolves chatId with `getNumberId`
+- **macOS Puppeteer Error** (`spawn /usr/bin/chromium-browser ENOENT`): Set `WAAKU_RUNTIME=mac` in `.env`. If Chrome is in a custom location, set `WAAKU_CHROME_PATH=/path/to/chrome`
+- **Webhook not receiving data**: Check WEBHOOK_URL is accessible and returns HTTP 200. Use `node examples/webhook-example.js` to test locallyatsapp-web.js)
 - QR login flow, live status, health dashboard
 - Real‑time UI (Socket.IO) — no polling
 - Secure API with X‑API‑Key (UUIDv4 raw on client, SHA‑512 hash on server)
@@ -47,6 +54,7 @@ vite.config.js, tailwind.config.js
 
 - Node.js 18+ (for local runs)
 - Docker + docker‑compose (optional but recommended)
+- **macOS users**: Google Chrome or Chromium browser
 
 ## Minimum requirements (hardware/server)
 
@@ -70,13 +78,19 @@ Set these variables (see .env.example for all):
 - VITE_API_BASE_URL=http://localhost:4300 (or omit to use window origin)
 - VITE_API_KEY=<raw UUIDv4 without dashes>
 - WAAKU_API_KEY=<sha512 hash of the raw key>
+- WAAKU_RUNTIME=mac (for macOS) or linux (for Docker/Linux)
 - WEBHOOK_URL=<optional URL to receive message webhooks>
 - WEBHOOK_SECRET=<optional secret for webhook authentication>
+- WAAKU_CHROME_PATH=<optional custom Chrome path for macOS>
 
 Generate values:
 
 - Raw UUID (client): any v4 without dashes (e.g. `uuidgen | tr -d '-'` on macOS)
 - Hash (server): `echo -n <raw> | shasum -a 512 | awk '{print $1}'`
+
+**For macOS users**, also set:
+- `WAAKU_RUNTIME=mac` (enables macOS-specific Chrome detection)
+- `WAAKU_CHROME_PATH=/path/to/chrome` (optional, if Chrome is in custom location)
 
 2) Install and run
 

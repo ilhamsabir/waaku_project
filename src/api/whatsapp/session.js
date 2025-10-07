@@ -29,6 +29,10 @@ function buildPuppeteerOptions() {
 
 	const macArgs = [
 		'--disable-gpu',
+		'--disable-dev-shm-usage',
+		'--disable-setuid-sandbox',
+		'--no-first-run',
+		'--no-default-browser-check',
 	]
 
 	const options = {
@@ -36,11 +40,12 @@ function buildPuppeteerOptions() {
 		args: [...commonArgs, ...(isLinux ? linuxArgs : macArgs)],
 	}
 
-	// Only enforce executablePath on Linux (Docker). On mac, let puppeteer resolve its Chromium
+	// Set executable path based on runtime
 	if (isLinux) {
 		options.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser'
-	} else if (process.env.WAAKU_CHROME_PATH) {
-		options.executablePath = process.env.WAAKU_CHROME_PATH
+	} else if (isMac) {
+		// For macOS, use Chrome if available or custom path
+		options.executablePath = process.env.WAAKU_CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 	}
 
 	console.log(`[PUPPETEER] Runtime=${RUNTIME} headless=${options.headless} exec=${options.executablePath || 'auto'}`)
