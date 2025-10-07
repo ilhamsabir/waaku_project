@@ -1,6 +1,7 @@
 const { Client, LocalAuth } = require('whatsapp-web.js')
 // Lazy socket accessor to avoid circular imports
 const { getIO } = require('../socket')
+const axios = require('axios')
 
 // Environment-aware Puppeteer runtime selection
 const RUNTIME = process.env.WAAKU_RUNTIME || 'linux' // 'linux' (default) | 'mac'
@@ -47,6 +48,46 @@ function buildPuppeteerOptions() {
 }
 
 const sessions = {}
+
+// Webhook configuration
+const WEBHOOK_URL = process.env.WEBHOOK_URL
+const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET
+
+// Function to send webhook notification
+async function sendWebhook(eventType, data) {
+	if (!WEBHOOK_URL) {
+		console.log('[WEBHOOK] No webhook URL configured, skipping...')
+		return
+	}
+
+	try {
+		const payload = {
+			event: eventType,
+			timestamp: new Date().toISOString(),
+			data
+		}
+
+		const headers = {
+			'Content-Type': 'application/json',
+			'User-Agent': 'Waaku-Webhook/1.0'
+		}
+
+		// Add webhook secret if configured
+		if (WEBHOOK_SECRET) {
+			headers['X-Webhook-Secret'] = WEBHOOK_SECRET
+		}
+
+		console.log(`[WEBHOOK] Sending ${eventType} to ${WEBHOOK_URL}`)
+		const response = await axios.post(WEBHOOK_URL, payload, {
+			headers,
+			timeout: 10000 // 10 second timeout
+		})
+
+		console.log(`[WEBHOOK] ${eventType} sent successfully, status: ${response.status}`)
+	} catch (error) {
+		console.error(`[WEBHOOK] Failed to send ${eventType}:`, error.message)
+	}
+}
 
 function createSession(id) {
 	if (sessions[id]) return sessions[id]
@@ -134,6 +175,97 @@ function createSession(id) {
 		sessions[id].lastActivity = new Date()
 		const io = getIO()
 		if (io) io.emit('session:state', { id, state })
+	})
+
+	// Listen for incoming messages to detect replies
+	client.on('message', async (message) => {
+		try {
+			console.log(`[${id}] Received message from ${message.from}: ${message.body}`)
+
+			// Check if this message is a reply to another message
+			if (message.hasQuotedMsg) {
+				const quotedMsg = await message.getQuotedMessage()
+				console.log(`[${id}] Message is a reply to: ${quotedMsg.body}`)
+
+				// Get contact information
+				const contact = await message.getContact()
+				const chat = await message.getChat()
+
+				// Prepare webhook data for reply
+				const webhookData = {
+					sessionId: id,
+					messageId: message.id._serialized,
+					from: message.from,
+					to: message.to,
+					body: message.body,
+					timestamp: message.timestamp,
+					isReply: true,
+					quotedMessage: {
+						id: quotedMsg.id._serialized,
+						body: quotedMsg.body,
+						from: quotedMsg.from,
+						timestamp: quotedMsg.timestamp
+					},
+					contact: {
+						name: contact.name || contact.pushname || contact.number,
+						number: contact.number,
+						isMyContact: contact.isMyContact
+					},
+					chat: {
+						name: chat.name,
+						isGroup: chat.isGroup,
+						participantCount: chat.isGroup ? chat.participants.length : null
+					}
+				}
+
+				// Send webhook notification
+				await sendWebhook('message_reply', webhookData)
+
+				// Emit socket event for real-time updates
+				const io = getIO()
+				if (io) {
+					io.emit('message:reply', webhookData)
+				}
+			} else {
+				// Regular message (not a reply)
+				const contact = await message.getContact()
+				const chat = await message.getChat()
+
+				const webhookData = {
+					sessionId: id,
+					messageId: message.id._serialized,
+					from: message.from,
+					to: message.to,
+					body: message.body,
+					timestamp: message.timestamp,
+					isReply: false,
+					contact: {
+						name: contact.name || contact.pushname || contact.number,
+						number: contact.number,
+						isMyContact: contact.isMyContact
+					},
+					chat: {
+						name: chat.name,
+						isGroup: chat.isGroup,
+						participantCount: chat.isGroup ? chat.participants.length : null
+					}
+				}
+
+				// Send webhook notification for regular messages too (optional)
+				await sendWebhook('message_received', webhookData)
+
+				// Emit socket event
+				const io = getIO()
+				if (io) {
+					io.emit('message:received', webhookData)
+				}
+			}
+
+			// Update session activity
+			sessions[id].lastActivity = new Date()
+		} catch (error) {
+			console.error(`[${id}] Error processing message:`, error)
+		}
 	})
 
 	client.initialize()

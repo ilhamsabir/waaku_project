@@ -436,6 +436,18 @@ function initSockets() {
 	const onHealthUpdate = (payload) => {
 		healthData.value = payload
 	}
+	const onMessageReply = (payload) => {
+		console.log('Message reply received:', payload)
+		const { contact, body, quotedMessage } = payload.data
+		showNotification(`💬 Reply from ${contact.name || contact.number}: "${body}" (replied to: "${quotedMessage.body.substring(0, 30)}...")`)
+	}
+	const onMessageReceived = (payload) => {
+		console.log('Message received:', payload)
+		const { contact, body, isReply } = payload.data
+		if (!isReply) {
+			showNotification(`📨 New message from ${contact.name || contact.number}: "${body.substring(0, 50)}${body.length > 50 ? '...' : ''}"`)
+		}
+	}
 
 	onSocket('sessions:update', onSessionUpdate)
 	onSocket('session:ready', onSessionReady)
@@ -443,6 +455,8 @@ function initSockets() {
 	onSocket('session:disconnected', onSessionDisconnected)
 	onSocket('session:qr', onQR)
 	onSocket('health:update', onHealthUpdate)
+	onSocket('message:reply', onMessageReply)
+	onSocket('message:received', onMessageReceived)
 
 	detachSockets = () => {
 		offSocket('sessions:update', onSessionUpdate)
@@ -451,6 +465,8 @@ function initSockets() {
 		offSocket('session:disconnected', onSessionDisconnected)
 		offSocket('session:qr', onQR)
 		offSocket('health:update', onHealthUpdate)
+		offSocket('message:reply', onMessageReply)
+		offSocket('message:received', onMessageReceived)
 	}
 
 	if (import.meta.hot) {

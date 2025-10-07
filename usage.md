@@ -1,6 +1,20 @@
 # Waaku — End‑User Guide (Direct Usage)
 
-This guide is for operators who want to run and use Waaku without developing the code. You’ll get a working dashboard, create WhatsApp sessions, scan QR codes, and send messages.
+This guide is for operators who want to run and use Waaku without developing the code. You’ll get a That's it — you're running Waaku.
+
+## Webhook Integration (Optional)
+
+If you want to receive notifications when someone replies to your messages or sends new messages, you can configure webhook URLs in your `.env`:
+
+```bash
+# Add these to your .env file
+WEBHOOK_URL=https://your-domain.com/webhook
+WEBHOOK_SECRET=your-optional-secret
+```
+
+Your webhook endpoint will receive POST requests with JSON payloads containing message data, contact information, and chat details. See the main README.md for detailed webhook payload examples.
+
+## Alternative: Local run (no Docker)king dashboard, create WhatsApp sessions, scan QR codes, and send messages.
 
 If you’re looking to contribute or dive into the code, see `README.md`.
 

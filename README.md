@@ -13,6 +13,7 @@ Manage multiple WhatsApp sessions with a modern Vue 3 UI, secure Express API, re
 - Real‑time UI (Socket.IO) — no polling
 - Secure API with X‑API‑Key (UUIDv4 raw on client, SHA‑512 hash on server)
 - Direct dashboard access (no login required)
+- Webhook notifications for message replies and incoming messages
 - Docker and docker‑compose for dev and prod
 
 ## Tech Stack
@@ -69,6 +70,8 @@ Set these variables (see .env.example for all):
 - VITE_API_BASE_URL=http://localhost:4300 (or omit to use window origin)
 - VITE_API_KEY=<raw UUIDv4 without dashes>
 - WAAKU_API_KEY=<sha512 hash of the raw key>
+- WEBHOOK_URL=<optional URL to receive message webhooks>
+- WEBHOOK_SECRET=<optional secret for webhook authentication>
 
 Generate values:
 
@@ -189,6 +192,78 @@ Admin helper: POST /admin/generate-api-key returns a client key + server hash (r
   - POST   /api/messages/:id/send { to, message }
 
 Note: The legacy endpoints under /api/sessions/:id/(validate|send) remain available for backward compatibility.
+
+## Webhook Integration
+
+Waaku supports webhook notifications for incoming messages and replies. Configure webhook settings in your `.env`:
+
+```bash
+# Optional: URL to receive webhook notifications
+WEBHOOK_URL=https://your-domain.com/webhook
+
+# Optional: Secret for webhook authentication
+WEBHOOK_SECRET=your-secret-key
+```
+
+### Webhook Events
+
+**Message Reply** (`message_reply`):
+```json
+{
+  "event": "message_reply",
+  "timestamp": "2025-10-07T10:30:00.000Z",
+  "data": {
+    "sessionId": "mybot",
+    "messageId": "message_id",
+    "from": "628123456789@c.us",
+    "to": "session_number@c.us",
+    "body": "Reply message text",
+    "timestamp": 1696681800,
+    "isReply": true,
+    "quotedMessage": {
+      "id": "quoted_message_id",
+      "body": "Original message being replied to",
+      "from": "original_sender@c.us",
+      "timestamp": 1696681500
+    },
+    "contact": {
+      "name": "John Doe",
+      "number": "628123456789",
+      "isMyContact": true
+    },
+    "chat": {
+      "name": "Chat Name",
+      "isGroup": false,
+      "participantCount": null
+    }
+  }
+}
+```
+
+**Regular Message** (`message_received`):
+```json
+{
+  "event": "message_received",
+  "timestamp": "2025-10-07T10:30:00.000Z",
+  "data": {
+    "sessionId": "mybot",
+    "messageId": "message_id",
+    "from": "628123456789@c.us",
+    "to": "session_number@c.us",
+    "body": "Hello world",
+    "timestamp": 1696681800,
+    "isReply": false,
+    "contact": { ... },
+    "chat": { ... }
+  }
+}
+```
+
+### Webhook Headers
+
+- `Content-Type: application/json`
+- `User-Agent: Waaku-Webhook/1.0`
+- `X-Webhook-Secret: your-secret-key` (if `WEBHOOK_SECRET` is configured)
 
 ## Troubleshooting
 
