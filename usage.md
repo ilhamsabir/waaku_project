@@ -9,7 +9,17 @@ If you want to receive notifications when someone replies to your messages or se
 ```bash
 # Add these to your .env file
 WEBHOOK_URL=https://your-domain.com/webhook
-WEBHOOK_SECRET=your-optional-secret
+W- Message send fails with "Evaluation failed":
+  - Use international format (e.g., 62…) and ensure the number exists; validation helps
+
+- Chatwoot integration not working:
+  - Test your configuration with: `node examples/chatwoot-test.js`
+  - Check server logs for `[CHATWOOT]` error messages
+  - Verify your API token has sufficient permissions
+  - Ensure your Account ID and Inbox ID are correct
+  - Check that your Chatwoot instance is accessible from WAAKU
+
+## Where to get helpOK_SECRET=your-optional-secret
 ```
 
 ### Testing Webhooks Locally
@@ -30,6 +40,73 @@ WEBHOOK_SECRET=your-optional-secret
 3. **Create a session and send messages to test webhook delivery**
 
 Your webhook endpoint will receive POST requests with JSON payloads containing message data, contact information, and chat details. See the main README.md for detailed webhook payload examples.
+
+## Chatwoot Integration (Optional)
+
+WAAKU can automatically sync all WhatsApp messages with Chatwoot for customer support workflows. This integration creates contacts, conversations, and syncs both incoming and outgoing messages.
+
+### Setup Chatwoot Integration
+
+1. **Get Chatwoot credentials:**
+   - Login to your Chatwoot instance (e.g., https://app.chatwoot.com)
+   - Go to **Settings** → **Account Settings** → **API Access Tokens**
+   - Create a new API access token
+   - Note your Account ID from the account settings
+   - Create a WhatsApp inbox and note the Inbox ID
+
+2. **Configure WAAKU with Chatwoot credentials:**
+   ```bash
+   # Add these to your .env file
+   CHATWOOT_URL=https://app.chatwoot.com  # Your Chatwoot instance URL
+   CHATWOOT_TOKEN=your_api_access_token   # From step 1
+   ACCOUNT_ID=1                          # Your account ID
+   INBOX_ID=1                            # Your WhatsApp inbox ID
+   ```
+
+3. **Test the integration:**
+   - Start WAAKU with Chatwoot configuration
+   - Create a WhatsApp session and receive a message
+   - Check your Chatwoot inbox - you should see:
+     - New contact created automatically
+     - New conversation started
+     - Incoming message appears in Chatwoot
+
+### How It Works
+
+- **Incoming Messages**: WhatsApp → WAAKU → Chatwoot (marked as incoming)
+- **Outgoing Messages**: WAAKU API → WhatsApp → Chatwoot (marked as outgoing)
+- **Automatic Contact Creation**: New WhatsApp numbers become Chatwoot contacts
+- **Conversation Management**: Each contact gets a conversation in your inbox
+- **Reply Detection**: WhatsApp replies include the quoted message content
+
+### Agent Reply Integration
+
+For bidirectional communication where agents can reply from Chatwoot:
+
+1. **Add webhook secret to your .env:**
+   ```bash
+   CHATWOOT_WEBHOOK_SECRET=your-secure-webhook-secret
+   ```
+
+2. **Configure webhook in Chatwoot:**
+   - Go to Settings → Integrations → Webhooks
+   - Add webhook URL: `https://your-waaku-domain.com/api/chatwoot/webhook`
+   - Set webhook secret (same as CHATWOOT_WEBHOOK_SECRET)
+   - Enable "Message Created" events
+   - Save configuration
+
+3. **Test the bidirectional flow:**
+   - Customer sends WhatsApp message → appears in Chatwoot
+   - Agent replies in Chatwoot → automatically sent to WhatsApp customer
+   - Full conversation sync in both directions
+
+### Benefits
+
+- **Unified Support**: Handle WhatsApp messages alongside other channels in Chatwoot
+- **Team Collaboration**: Multiple agents can handle WhatsApp conversations
+- **Bidirectional Communication**: Agents reply directly from Chatwoot interface
+- **Message History**: Full conversation history preserved in Chatwoot
+- **Automation**: Use Chatwoot's automation rules and canned responses
 
 ## Alternative: Local run (no Docker)king dashboard, create WhatsApp sessions, scan QR codes, and send messages.
 

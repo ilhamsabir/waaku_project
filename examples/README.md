@@ -2,6 +2,69 @@
 
 This directory contains example code and integrations for Waaku.
 
+## Chatwoot Integration Test
+
+`chatwoot-test.js` - A test script to verify your Chatwoot configuration and API connectivity.
+
+### Setup
+
+1. Configure your Chatwoot credentials in `.env`:
+   ```bash
+   CHATWOOT_URL=https://app.chatwoot.com
+   CHATWOOT_TOKEN=your_api_token
+   ACCOUNT_ID=1
+   INBOX_ID=1
+   ```
+
+2. Run the test:
+   ```bash
+   node examples/chatwoot-test.js
+   ```
+
+### What it tests
+
+- ✅ Account access with your API token
+- ✅ Inbox access and configuration
+- ✅ Contact creation capability
+- ✅ Conversation creation capability
+- ✅ Message sending functionality
+- 🧹 Automatic cleanup of test data
+
+This script helps you verify your Chatwoot setup before enabling the integration in Waaku.
+
+## Chatwoot Bidirectional Integration Test
+
+`chatwoot-bidirectional-test.js` - Complete test for bidirectional Chatwoot integration including agent replies.
+
+### Setup
+
+1. Configure all Chatwoot credentials plus webhook secret in `.env`:
+   ```bash
+   CHATWOOT_URL=https://app.chatwoot.com
+   CHATWOOT_TOKEN=your_api_token
+   ACCOUNT_ID=1
+   INBOX_ID=1
+   CHATWOOT_WEBHOOK_SECRET=your-webhook-secret
+   WAAKU_URL=http://localhost:4300
+   VITE_API_KEY=your-api-key
+   ```
+
+2. Run the bidirectional test:
+   ```bash
+   node examples/chatwoot-bidirectional-test.js
+   ```
+
+### What it tests
+
+- ✅ WAAKU server health and availability
+- ✅ Chatwoot webhook endpoint configuration
+- ✅ Webhook payload processing (simulated agent reply)
+- ✅ WhatsApp session availability for sending
+- ✅ Complete bidirectional message flow
+- 📋 Provides Chatwoot webhook configuration guide
+
+This comprehensive test verifies that agents can reply from Chatwoot and messages will be automatically sent to WhatsApp contacts.
+
 ## Webhook Example
 
 `webhook-example.js` - A simple Express.js server that demonstrates how to receive and process webhook notifications from Waaku.

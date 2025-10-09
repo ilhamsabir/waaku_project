@@ -10,29 +10,46 @@
 
 const crypto = require('crypto')
 
-// Normalize stored API key (accepts optional 'sha512:' prefix) or derive from VITE_API_KEY
-function resolveStoredApiKey() {
-	let key = (process.env.WAAKU_API_KEY || '').trim()
-	if (key.toLowerCase().startsWith('sha512:')) {
-		key = key.slice(7)
-	}
-	key = key.toLowerCase()
-	if (!key) {
-		const raw = (process.env.VITE_API_KEY || '').trim()
-		if (/^[a-f0-9]{32}$/i.test(raw)) {
-			const rawNormalized = raw.toLowerCase()
-			key = crypto.createHash('sha512').update(rawNormalized).digest('hex')
-			console.warn('[AUTH] WAAKU_API_KEY not set; derived from VITE_API_KEY at runtime')
+// Resolve API key configuration (supports multiple modes)
+function resolveApiKeyConfig() {
+	// Check if VITE_API_KEY is set for simple mode
+	const viteApiKey = (process.env.VITE_API_KEY || '').trim()
+	const waakyApiKey = (process.env.WAAKU_API_KEY || '').trim()
+
+	if (viteApiKey && !waakyApiKey) {
+		// Simple mode: use VITE_API_KEY directly
+		console.log('[AUTH] Using simple API key mode (VITE_API_KEY)')
+		return {
+			mode: 'simple',
+			key: viteApiKey
 		}
-	}
-	if (!/^[a-f0-9]{128}$/.test(key)) {
-		console.error('❌ WAAKU_API_KEY must be a valid SHA-512 hash (128 hex characters) or provide VITE_API_KEY (UUID4 without dashes) to derive it')
+	} else if (waakyApiKey) {
+		// Secure mode: use SHA-512 hashing
+		let key = waakyApiKey
+		if (key.toLowerCase().startsWith('sha512:')) {
+			key = key.slice(7)
+		}
+		key = key.toLowerCase()
+
+		if (!/^[a-f0-9]{128}$/.test(key)) {
+			console.error('❌ WAAKU_API_KEY must be a valid SHA-512 hash (128 hex characters)')
+			process.exit(1)
+		}
+
+		console.log('[AUTH] Using secure API key mode (WAAKU_API_KEY + SHA-512)')
+		return {
+			mode: 'secure',
+			key: key,
+			rawKey: viteApiKey // for reference
+		}
+	} else {
+		console.error('❌ Either VITE_API_KEY (simple mode) or WAAKU_API_KEY (secure mode) must be set')
 		process.exit(1)
 	}
-	return key
 }
 
-const WAAKU_API_KEY = resolveStoredApiKey()
+// Initialize auth configuration
+const API_CONFIG = resolveApiKeyConfig()
 
 // Generate SHA-512 hash from raw UUID4 key
 const getSecureHash = (rawKey) => {
@@ -71,21 +88,30 @@ const validateApiKey = (req, res, next) => {
 		})
 	}
 
-	// Hash the provided UUID4 key and compare with stored SHA-512 hash
-	const providedKeyHash = getSecureHash(providedKey.toLowerCase())
-	const providedHashBuffer = Buffer.from(providedKeyHash, 'hex')
-	const storedHashBuffer = Buffer.from(WAAKU_API_KEY, 'hex')
+	let isValid = false
 
-	if (providedHashBuffer.length !== storedHashBuffer.length) {
-		return res.status(401).json({
-			success: false,
-			error: 'Invalid X-API-Key',
-			message: 'The provided API key is invalid',
-			code: 'INVALID_API_KEY'
-		})
+	if (API_CONFIG.mode === 'simple') {
+		// Simple mode: compare raw keys directly
+		const normalizedProvided = providedKey.toLowerCase()
+		const normalizedStored = API_CONFIG.key.toLowerCase().replace(/-/g, '')
+		isValid = normalizedProvided === normalizedStored
+	} else {
+		// Secure mode: hash provided key and compare with stored SHA-512 hash
+		const providedKeyHash = getSecureHash(providedKey.toLowerCase())
+		const providedHashBuffer = Buffer.from(providedKeyHash, 'hex')
+		const storedHashBuffer = Buffer.from(API_CONFIG.key, 'hex')
+
+		if (providedHashBuffer.length !== storedHashBuffer.length) {
+			return res.status(401).json({
+				success: false,
+				error: 'Invalid X-API-Key',
+				message: 'The provided API key is invalid',
+				code: 'INVALID_API_KEY'
+			})
+		}
+
+		isValid = crypto.timingSafeEqual(providedHashBuffer, storedHashBuffer)
 	}
-
-	const isValid = crypto.timingSafeEqual(providedHashBuffer, storedHashBuffer)
 
 	if (!isValid) {
 		return res.status(401).json({

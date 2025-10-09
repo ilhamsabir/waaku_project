@@ -290,4 +290,223 @@
  *                 properties:
  *                   error:
  *                     example: 'session not ready'
+ *
+ *     WebhookEvent:
+ *       type: object
+ *       properties:
+ *         event:
+ *           type: string
+ *           enum: [message_received, message_reply]
+ *           description: Type of webhook event
+ *           example: 'message_received'
+ *         timestamp:
+ *           type: string
+ *           format: date-time
+ *           description: Event timestamp
+ *           example: '2025-10-09T10:30:00.000Z'
+ *         data:
+ *           $ref: '#/components/schemas/MessageData'
+ *
+ *     MessageData:
+ *       type: object
+ *       properties:
+ *         sessionId:
+ *           type: string
+ *           description: Session ID that received the message
+ *           example: 'session-1'
+ *         messageId:
+ *           type: string
+ *           description: WhatsApp message ID
+ *           example: 'message_12345'
+ *         from:
+ *           type: string
+ *           description: Sender WhatsApp ID
+ *           example: '628123456789@c.us'
+ *         to:
+ *           type: string
+ *           description: Recipient WhatsApp ID
+ *           example: '628987654321@c.us'
+ *         body:
+ *           type: string
+ *           description: Message content
+ *           example: 'Hello, this is a test message'
+ *         timestamp:
+ *           type: number
+ *           description: Unix timestamp
+ *           example: 1696681800000
+ *         isReply:
+ *           type: boolean
+ *           description: Whether this message is a reply
+ *           example: false
+ *         quotedMessage:
+ *           type: object
+ *           nullable: true
+ *           description: Quoted message data (if isReply is true)
+ *           properties:
+ *             id:
+ *               type: string
+ *               example: 'quoted_message_123'
+ *             body:
+ *               type: string
+ *               example: 'Original message content'
+ *             from:
+ *               type: string
+ *               example: '628987654321@c.us'
+ *             timestamp:
+ *               type: number
+ *               example: 1696681500000
+ *         contact:
+ *           $ref: '#/components/schemas/ContactInfo'
+ *         chat:
+ *           $ref: '#/components/schemas/ChatInfo'
+ *
+ *     ContactInfo:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *           description: Contact display name
+ *           example: 'John Doe'
+ *         number:
+ *           type: string
+ *           description: Contact phone number
+ *           example: '628123456789'
+ *         isMyContact:
+ *           type: boolean
+ *           description: Whether this contact is in your contacts
+ *           example: true
+ *
+ *     ChatInfo:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *           description: Chat name (for groups)
+ *           example: 'Project Team'
+ *         isGroup:
+ *           type: boolean
+ *           description: Whether this is a group chat
+ *           example: false
+ *         participantCount:
+ *           type: number
+ *           nullable: true
+ *           description: Number of participants (for groups)
+ *           example: null
+ *
+ *     ChatwootIntegration:
+ *       type: object
+ *       properties:
+ *         enabled:
+ *           type: boolean
+ *           description: Whether Chatwoot integration is enabled
+ *           example: true
+ *         url:
+ *           type: string
+ *           description: Chatwoot instance URL
+ *           example: 'https://app.chatwoot.com'
+ *         accountId:
+ *           type: string
+ *           description: Chatwoot account ID
+ *           example: '1'
+ *         inboxId:
+ *           type: string
+ *           description: Chatwoot inbox ID
+ *           example: '1'
+ *         status:
+ *           type: string
+ *           enum: [connected, disconnected, error]
+ *           description: Integration status
+ *           example: 'connected'
+ *
+ *     ServiceConfiguration:
+ *       type: object
+ *       properties:
+ *         runtime:
+ *           type: string
+ *           enum: [linux, mac]
+ *           description: Runtime environment
+ *           example: 'linux'
+ *         webhook:
+ *           type: object
+ *           properties:
+ *             enabled:
+ *               type: boolean
+ *               example: true
+ *             url:
+ *               type: string
+ *               example: 'https://your-webhook.com/events'
+ *         chatwoot:
+ *           $ref: '#/components/schemas/ChatwootIntegration'
+ *         puppeteer:
+ *           type: object
+ *           properties:
+ *             runtime:
+ *               type: string
+ *               example: 'linux'
+ *             executablePath:
+ *               type: string
+ *               example: '/usr/bin/chromium-browser'
+ *
+ *     ChatwootWebhookPayload:
+ *       type: object
+ *       description: Webhook payload sent by Chatwoot for message events
+ *       properties:
+ *         event_type:
+ *           type: string
+ *           enum: [message_created, message_updated, conversation_created, conversation_updated]
+ *           description: Type of Chatwoot event
+ *           example: 'message_created'
+ *         event_data:
+ *           type: object
+ *           properties:
+ *             id:
+ *               type: number
+ *               description: Message ID in Chatwoot
+ *               example: 12345
+ *             content:
+ *               type: string
+ *               description: Message content
+ *               example: 'Thank you for contacting us'
+ *             message_type:
+ *               type: string
+ *               enum: [incoming, outgoing]
+ *               description: Message direction
+ *               example: 'outgoing'
+ *             sender_type:
+ *               type: string
+ *               enum: [User, Contact, System]
+ *               description: Who sent the message
+ *               example: 'User'
+ *             created_at:
+ *               type: string
+ *               format: date-time
+ *               description: Message creation timestamp
+ *               example: '2025-10-09T10:30:00.000Z'
+ *             conversation:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: number
+ *                   description: Conversation ID in Chatwoot
+ *                   example: 1001
+ *                 contact_inbox:
+ *                   type: object
+ *                   properties:
+ *                     source_id:
+ *                       type: string
+ *                       description: Contact phone number or identifier
+ *                       example: '628123456789'
+ *             sender:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: number
+ *                   example: 1
+ *                 name:
+ *                   type: string
+ *                   example: 'Agent John'
+ *                 email:
+ *                   type: string
+ *                   format: email
+ *                   example: 'john@company.com'
  */

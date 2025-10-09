@@ -11,12 +11,17 @@
  *   get:
  *     summary: Get health status of all sessions
  *     description: |
- *       Returns comprehensive health information for all WhatsApp sessions.
+ *       Returns comprehensive health information for all WhatsApp sessions and service integrations.
  *
  *       **Health Criteria:**
  *       - **Healthy**: Session is in good state with recent activity (< 5 minutes)
  *       - **Unhealthy**: Session has issues or no recent activity (> 5 minutes)
  *       - **Stale**: No activity for more than 5 minutes
+ *
+ *       **Integration Status:**
+ *       - **Webhook**: Shows if webhook URL is configured and reachable
+ *       - **Chatwoot**: Shows if Chatwoot integration is configured and connected
+ *       - **Puppeteer**: Shows runtime configuration (Linux/macOS)
  *
  *       **HTTP Status Codes:**
  *       - `200`: All sessions are healthy

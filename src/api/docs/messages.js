@@ -18,6 +18,9 @@
  *       - Session must be in 'ready' status
  *       - Phone number must be in international format (without + sign)
  *
+ *       **Integrations:**
+ *       - No external integrations triggered for validation
+ *
  *       Note: Legacy endpoints `/api/sessions/{id}/validate` and `/api/sessions/{id}/send` are still supported but deprecated.
  *     tags: [Messages]
  *     parameters:
@@ -100,10 +103,16 @@
  *       - Recipient number must be valid (recommend validating first)
  *       - Message text cannot be empty
  *
+ *       **Automatic Integrations:**
+ *       - **Chatwoot**: Message automatically synced as outgoing message if configured
+ *       - **Webhooks**: No webhook triggered for outgoing messages (only incoming)
+ *       - **Socket.IO**: Real-time delivery status emitted to connected clients
+ *
  *       **Tips:**
  *       - Use the validation endpoint first to check if number exists
  *       - Phone numbers should be in international format (without + sign)
  *       - Messages are sent as plain text
+ *       - Check Chatwoot conversation for message history if integration is enabled
  *
  *       Note: Legacy endpoints `/api/sessions/{id}/validate` and `/api/sessions/{id}/send` are still supported but deprecated.
  *     tags: [Messages]

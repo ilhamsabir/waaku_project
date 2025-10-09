@@ -1,6 +1,8 @@
 const { getSession } = require('../whatsapp/session')
+const { MessageHandlerService } = require('../services')
 
-// Validate number handler
+// Initialize message handler service
+const messageHandler = new MessageHandlerService()// Validate number handler
 async function validateNumberHandler(req, res) {
 	const s = getSession(req.params.id)
 	if (!s || !s.ready) return res.status(400).json({ error: 'session not ready' })
@@ -53,6 +55,15 @@ async function sendMessageHandler(req, res) {
 		}
 
 		const result = await s.client.sendMessage(chatId, message)
+
+		// Handle outgoing message with services
+		await messageHandler.handleOutgoingMessage(req.params.id, {
+			to: chatId,
+			message: message,
+			timestamp: Date.now(),
+			sessionId: req.params.id
+		})
+
 		res.json({ success: true, result, to: chatId })
 	} catch (err) {
 		console.error('[send] error sending message:', err)

@@ -11,13 +11,24 @@
  *   get:
  *     summary: Check general service health
  *     description: |
- *       Returns the general health status of the WhatsApp Multi-Session service.
- *       This endpoint provides basic service information including:
- *       - Service status and uptime
- *       - Memory usage statistics
- *       - API version information
+ *       Returns the general health status of the WAAKU WhatsApp Multi-Session service.
+ *       This endpoint provides comprehensive service information including:
  *
- *       This is useful for monitoring tools and load balancers.
+ *       **Service Status:**
+ *       - Service uptime and operational status
+ *       - Memory usage and performance metrics
+ *       - API version and build information
+ *
+ *       **Integration Health:**
+ *       - Chatwoot integration status (if configured)
+ *       - Webhook endpoint availability (if configured)
+ *       - Puppeteer/Chrome runtime status
+ *
+ *       **Use Cases:**
+ *       - Health checks for monitoring tools (Prometheus, DataDog, etc.)
+ *       - Load balancer health verification
+ *       - Docker container health checks
+ *       - Service discovery health validation
  *     tags: [General]
  *     responses:
  *       200:

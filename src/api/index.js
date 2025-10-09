@@ -87,6 +87,7 @@ app.get('/api', (req, res) => {
 app.use('/api', validateApiKey)
 app.use('/api/sessions', sessionRoutes)
 app.use('/api/messages', messageRoutes)
+app.use('/api/chatwoot', require('./routes/chatwoot'))
 
 // Serve built frontend (Vite dist) in production
 const frontendDir = path.resolve(__dirname, '../../dist')

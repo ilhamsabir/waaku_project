@@ -82,6 +82,11 @@ Set these variables (see .env.example for all):
 - WEBHOOK_URL=<optional URL to receive message webhooks>
 - WEBHOOK_SECRET=<optional secret for webhook authentication>
 - WAAKU_CHROME_PATH=<optional custom Chrome path for macOS>
+- CHATWOOT_URL=<optional Chatwoot instance URL>
+- CHATWOOT_TOKEN=<optional Chatwoot API access token>
+- ACCOUNT_ID=<optional Chatwoot account ID>
+- INBOX_ID=<optional Chatwoot inbox ID for WhatsApp integration>
+- CHATWOOT_WEBHOOK_SECRET=<optional webhook secret for agent replies>
 
 Generate values:
 
@@ -176,6 +181,61 @@ For step‑by‑step operator instructions (Docker/local), QR workflow, and cURL
 - Rate limiting and access logging included
 
 Admin helper: POST /admin/generate-api-key returns a client key + server hash (requires a valid existing key).
+
+## Chatwoot Integration
+
+WAAKU can automatically sync messages with Chatwoot for customer support integration:
+
+### Features
+- **Automatic Contact Creation**: Creates contacts in Chatwoot for new WhatsApp numbers
+- **Conversation Management**: Creates and manages conversations for each contact
+- **Bidirectional Sync**: Syncs both incoming and outgoing messages
+- **Reply Detection**: Handles WhatsApp reply messages with quoted content
+
+### Configuration
+Set these environment variables to enable Chatwoot integration:
+
+```bash
+CHATWOOT_URL=https://app.chatwoot.com  # Your Chatwoot instance URL
+CHATWOOT_TOKEN=your_api_token          # API access token from Chatwoot
+ACCOUNT_ID=1                           # Your Chatwoot account ID
+INBOX_ID=1                             # WhatsApp inbox ID in Chatwoot
+```
+
+### Getting Chatwoot Credentials
+1. Login to your Chatwoot instance
+2. Go to **Settings** → **Account Settings** → **API Access Tokens**
+3. Create a new token or use existing one
+4. Note your Account ID from the URL or account settings
+5. Create a WhatsApp inbox and note the Inbox ID
+
+### Message Flow
+- **Incoming Messages**: WhatsApp → WAAKU → Chatwoot (as incoming messages)
+- **Outgoing Messages**: WAAKU API → WhatsApp → Chatwoot (as outgoing messages)
+- **Agent Replies**: Chatwoot Agent → WAAKU Webhook → WhatsApp Contact
+- **Replies**: WhatsApp replies are detected and formatted with quoted content
+
+### Agent Reply Integration
+Enable agents to reply directly from Chatwoot and automatically send messages via WhatsApp:
+
+1. **Configure Chatwoot Webhook:**
+   ```bash
+   # Add to your .env file
+   CHATWOOT_WEBHOOK_SECRET=your-webhook-secret-key
+   ```
+
+2. **Setup Webhook in Chatwoot:**
+   - Go to Settings → Integrations → Webhooks
+   - Add webhook URL: `https://your-waaku-domain.com/api/chatwoot/webhook`
+   - Set webhook secret (matches CHATWOOT_WEBHOOK_SECRET)
+   - Enable "Message Created" events
+   - Save configuration
+
+3. **How it works:**
+   - Agent replies in Chatwoot conversation
+   - Chatwoot sends webhook to WAAKU
+   - WAAKU automatically sends reply to WhatsApp contact
+   - Full bidirectional communication enabled
 
 ## Realtime events (Socket.IO)
 
