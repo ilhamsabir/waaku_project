@@ -40,147 +40,51 @@ class ChatwootService {
 	}
 
 	/**
-	 * Search for existing contact by phone number
+	 * Search for existing contact by phone number (DISABLED)
 	 */
 	async findContact(phoneNumber) {
-		if (!this.isEnabled()) {
-			console.log('[CHATWOOT] Not configured, skipping contact lookup')
-			return null
-		}
-
-		try {
-			const cleanPhone = this.cleanPhoneNumber(phoneNumber)
-			const response = await axios.get(
-				`${this.baseURL}/api/v1/accounts/${this.accountId}/contacts/search`,
-				{
-					params: { q: cleanPhone },
-					headers: this.getHeaders(),
-					timeout: 10000
-				}
-			)
-
-			if (response.data?.payload?.length > 0) {
-				return response.data.payload[0]
-			}
-			return null
-		} catch (error) {
-			console.error('[CHATWOOT] Error searching contact:', error.message)
-			return null
-		}
+		console.log('[CHATWOOT] Contact search disabled - returning null')
+		return null
 	}
 
 	/**
-	 * Create a new contact in Chatwoot
+	 * Create a new contact in Chatwoot (DISABLED)
 	 */
 	async createContact(contactData) {
-		if (!this.isEnabled()) {
-			console.log('[CHATWOOT] Not configured, skipping contact creation')
-			return null
-		}
-
-		try {
-			const phoneNumber = this.cleanPhoneNumber(contactData.number)
-			const response = await axios.post(
-				`${this.baseURL}/api/v1/accounts/${this.accountId}/contacts`,
-				{
-					name: contactData.name || phoneNumber,
-					phone: phoneNumber,
-					identifier: phoneNumber
-				},
-				{
-					headers: this.getHeaders(),
-					timeout: 10000
-				}
-			)
-
-			console.log(`[CHATWOOT] Contact created: ${phoneNumber}`)
-			return response.data.payload.contact
-		} catch (error) {
-			console.error('[CHATWOOT] Error creating contact:', error.message)
-			return null
-		}
+		console.log('[CHATWOOT] Contact creation disabled - returning null')
+		return null
 	}
 
 	/**
-	 * Get or create contact
+	 * Get or create contact (DISABLED)
 	 */
 	async getOrCreateContact(contactData) {
-		let contact = await this.findContact(contactData.number)
-		if (!contact) {
-			contact = await this.createContact(contactData)
-		}
-		return contact
+		console.log('[CHATWOOT] Contact management disabled - returning null')
+		return null
 	}
 
 	/**
-	 * Find existing conversation for a contact
+	 * Find existing conversation for a contact (DISABLED)
 	 */
 	async findConversation(contactId) {
-		if (!this.isEnabled()) {
-			return null
-		}
-
-		try {
-			const response = await axios.get(
-				`${this.baseURL}/api/v1/accounts/${this.accountId}/conversations`,
-				{
-					params: {
-						inbox_id: this.inboxId,
-						status: 'open'
-					},
-					headers: this.getHeaders(),
-					timeout: 10000
-				}
-			)
-
-			const conversations = response.data.data.payload
-			return conversations.find(conv => conv.meta.sender.id === contactId) || null
-		} catch (error) {
-			console.error('[CHATWOOT] Error fetching conversations:', error.message)
-			return null
-		}
+		console.log('[CHATWOOT] Conversation search disabled - returning null')
+		return null
 	}
 
 	/**
-	 * Create a new conversation
+	 * Create a new conversation (DISABLED)
 	 */
 	async createConversation(contactId) {
-		if (!this.isEnabled()) {
-			console.log('[CHATWOOT] Not configured, skipping conversation creation')
-			return null
-		}
-
-		try {
-			const response = await axios.post(
-				`${this.baseURL}/api/v1/accounts/${this.accountId}/conversations`,
-				{
-					source_id: `whatsapp_${contactId}_${Date.now()}`,
-					inbox_id: parseInt(this.inboxId),
-					contact_id: contactId
-				},
-				{
-					headers: this.getHeaders(),
-					timeout: 10000
-				}
-			)
-
-			console.log(`[CHATWOOT] Conversation created for contact: ${contactId}`)
-			return response.data
-		} catch (error) {
-			console.error('[CHATWOOT] Error creating conversation:', error.message)
-			return null
-		}
+		console.log('[CHATWOOT] Conversation creation disabled - returning null')
+		return null
 	}
 
 	/**
-	 * Get or create conversation for a contact
+	 * Get or create conversation for a contact (DISABLED)
 	 */
 	async getOrCreateConversation(contactId) {
-		let conversation = await this.findConversation(contactId)
-		if (!conversation) {
-			conversation = await this.createConversation(contactId)
-		}
-		return conversation
+		console.log('[CHATWOOT] Conversation management disabled - returning null')
+		return null
 	}
 
 	/**
@@ -215,45 +119,92 @@ class ChatwootService {
 	}
 
 	/**
-	 * Handle incoming/outgoing message and sync to Chatwoot
+	 * Get messages from Chatwoot conversation
 	 */
-	async handleMessage(messageData, messageType = 'incoming') {
+	async getMessages(conversationId, page = 1) {
+		if (!this.isEnabled()) {
+			console.log('[CHATWOOT] Not configured, skipping message retrieval')
+			return null
+		}
+
+		try {
+			const response = await axios.get(
+				`${this.baseURL}/api/v1/accounts/${this.accountId}/conversations/${conversationId}/messages`,
+				{
+					params: { page },
+					headers: this.getHeaders(),
+					timeout: 10000
+				}
+			)
+
+			console.log(`[CHATWOOT] Retrieved messages from conversation ${conversationId}`)
+			return response.data
+		} catch (error) {
+			console.error('[CHATWOOT] Error getting messages:', error.message)
+			return null
+		}
+	}
+
+	/**
+	 * Get conversation details
+	 */
+	async getConversation(conversationId) {
+		if (!this.isEnabled()) {
+			console.log('[CHATWOOT] Not configured, skipping conversation retrieval')
+			return null
+		}
+
+		try {
+			const response = await axios.get(
+				`${this.baseURL}/api/v1/accounts/${this.accountId}/conversations/${conversationId}`,
+				{
+					headers: this.getHeaders(),
+					timeout: 10000
+				}
+			)
+
+			console.log(`[CHATWOOT] Retrieved conversation ${conversationId}`)
+			return response.data
+		} catch (error) {
+			console.error('[CHATWOOT] Error getting conversation:', error.message)
+			return null
+		}
+	}
+
+	/**
+	 * Send quick message to conversation (simplified version)
+	 */
+	async quickSendMessage(conversationId, content) {
+		return await this.sendMessage(conversationId, content, 'outgoing')
+	}
+
+	/**
+	 * Handle incoming/outgoing message and sync to Chatwoot (SIMPLIFIED)
+	 * Contact and conversation management disabled - manual conversation ID required
+	 */
+	async handleMessage(messageData, conversationId, messageType = 'incoming') {
 		if (!this.isEnabled()) {
 			console.log('[CHATWOOT] Not configured, skipping message handling')
 			return
 		}
 
+		if (!conversationId) {
+			console.log('[CHATWOOT] No conversation ID provided - contact/conversation management disabled')
+			return
+		}
+
 		try {
-			const phoneNumber = this.cleanPhoneNumber(messageData.from)
-
-			// Get or create contact
-			const contact = await this.getOrCreateContact({
-				name: messageData.contact?.name || phoneNumber,
-				number: phoneNumber
-			})
-
-			if (!contact) {
-				console.error('[CHATWOOT] Failed to get or create contact')
-				return
-			}
-
-			// Get or create conversation
-			const conversation = await this.getOrCreateConversation(contact.id)
-			if (!conversation) {
-				console.error('[CHATWOOT] Failed to get or create conversation')
-				return
-			}
-
 			// Prepare message content
 			let content = messageData.body || messageData.message
 			if (messageData.isReply && messageData.quotedMessage) {
 				content = `[Reply to: "${messageData.quotedMessage.body}"]\n\n${content}`
 			}
 
-			// Send message to Chatwoot
-			await this.sendMessage(conversation.id, content, messageType)
+			// Send message to Chatwoot with provided conversation ID
+			await this.sendMessage(conversationId, content, messageType)
 
-			console.log(`[CHATWOOT] Successfully processed ${messageType} message from ${phoneNumber}`)
+			const phoneNumber = this.cleanPhoneNumber(messageData.from || 'unknown')
+			console.log(`[CHATWOOT] Successfully processed ${messageType} message from ${phoneNumber} to conversation ${conversationId}`)
 		} catch (error) {
 			console.error('[CHATWOOT] Error handling message:', error.message)
 		}
