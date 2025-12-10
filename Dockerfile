@@ -25,7 +25,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install all dependencies (including dev) for build
-RUN npm ci
+RUN npm install -g vite
 
 # Copy source code
 COPY . .
