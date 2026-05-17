@@ -8,6 +8,8 @@ const {
 	getOneHealthHandler,
 	restartSessionHandler,
 	deleteSessionHandler,
+	getChatsHandler,
+	getChatMessagesHandler,
 } = require('../controllers/session')
 
 const router = express.Router()
@@ -20,6 +22,12 @@ router.get('/', listSessionsHandler)
 
 // Get QR for session
 router.get('/:id/qr', getQrHandler)
+
+// Get chats for session
+router.get('/:id/chats', getChatsHandler)
+
+// Get messages for specific chat
+router.get('/:id/chats/:chatId/messages', getChatMessagesHandler)
 
 // Validate number (backward compatible)
 router.post('/:id/validate', validateNumberHandler)

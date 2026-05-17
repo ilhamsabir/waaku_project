@@ -35,8 +35,8 @@ async function sendMessageHandler(req, res) {
 	if (!to || !message) return res.status(400).json({ error: 'invalid to or message' })
 
 	try {
-		// If user provided a raw phone (e.g., 62812...), resolve to chatId using getNumberId
-		const isChatId = /@c\.us$|@g\.us$/.test(to)
+		// If user provided a JID (contains @), use it directly. Otherwise, resolve to JID using getNumberId
+		const isChatId = to.includes('@')
 		let chatId = to
 
 		if (!isChatId) {

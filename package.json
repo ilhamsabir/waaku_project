@@ -32,7 +32,7 @@
 		"socket.io-client": "^4.7.5",
 		"swagger-jsdoc": "^6.2.8",
 		"swagger-ui-express": "^5.0.0",
-		"whatsapp-web.js": "^1.20.0"
+		"whatsapp-web.js": "^1.34.7"
 	},
 	"devDependencies": {
 		"@vitejs/plugin-vue": "^5.0.4",

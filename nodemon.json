@@ -1,7 +1,7 @@
 {
   "watch": ["src/api"],
   "ext": "js,json",
-  "ignore": ["dist", "node_modules"],
+  "ignore": ["dist", "node_modules", ".wwebjs_auth", ".wwebjs_cache"],
   "env": {
     "NODE_ENV": "development"
   }

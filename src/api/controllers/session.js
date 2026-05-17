@@ -30,7 +30,7 @@ async function getQrHandler(req, res) {
 	if (!s) return res.status(404).json({ error: 'not found' })
 	if (!s.qr) return res.json({ qr: null })
 	const qrImage = await QRCode.toDataURL(s.qr)
-	res.json({ qr: qrImage })
+	res.json({ qr: qrImage, rawQr: s.qr })
 }
 
 // Health check for all sessions
@@ -110,6 +110,53 @@ async function deleteSessionHandler(req, res) {
 	}
 }
 
+// Get chats for session
+async function getChatsHandler(req, res) {
+	try {
+		const s = getSession(req.params.id)
+		if (!s || !s.ready) return res.status(400).json({ error: 'Session not ready' })
+		
+		const chats = await s.client.getChats()
+		const mappedChats = chats.map(chat => ({
+			id: chat.id._serialized,
+			name: chat.name,
+			unreadCount: chat.unreadCount,
+			timestamp: chat.timestamp,
+			pinned: chat.pinned,
+			isGroup: chat.isGroup,
+		}))
+		res.json(mappedChats)
+	} catch (err) {
+		res.status(500).json({ error: err.message })
+	}
+}
+
+// Get messages for a specific chat
+async function getChatMessagesHandler(req, res) {
+	try {
+		const s = getSession(req.params.id)
+		if (!s || !s.ready) return res.status(400).json({ error: 'Session not ready' })
+		
+		const chat = await s.client.getChatById(req.params.chatId)
+		if (!chat) return res.status(404).json({ error: 'Chat not found' })
+		
+		const messages = await chat.fetchMessages({ limit: 50 })
+		const mappedMessages = messages.map(msg => ({
+			id: msg.id._serialized,
+			body: msg.body,
+			timestamp: msg.timestamp,
+			from: msg.from,
+			to: msg.to,
+			fromMe: msg.fromMe,
+			hasMedia: msg.hasMedia,
+			type: msg.type,
+		}))
+		res.json(mappedMessages)
+	} catch (err) {
+		res.status(500).json({ error: err.message })
+	}
+}
+
 module.exports = {
 	createSessionHandler,
 	listSessionsHandler,
@@ -118,4 +165,6 @@ module.exports = {
 	getOneHealthHandler,
 	restartSessionHandler,
 	deleteSessionHandler,
+	getChatsHandler,
+	getChatMessagesHandler,
 }

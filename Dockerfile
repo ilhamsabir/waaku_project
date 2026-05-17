@@ -1,7 +1,7 @@
 # Use Node.js 18 LTS as base image
 FROM node:18-alpine
 
-# Install Chrome dependencies for whatsapp-web.js
+# Install Chrome dependencies for whatsapp-web.js and curl for healthchecks
 RUN apk add --no-cache \
     chromium \
     nss \
@@ -9,7 +9,8 @@ RUN apk add --no-cache \
     freetype-dev \
     harfbuzz \
     ca-certificates \
-    ttf-freefont
+    ttf-freefont \
+    curl
 
 # Set Chrome executable path for Puppeteer
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
@@ -25,7 +26,8 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install all dependencies (including dev) for build
-RUN npm install -g vite
+# RUN npm install
+RUN npm ci
 
 # Copy source code
 COPY . .
@@ -53,8 +55,8 @@ RUN adduser -S nodejs -u 1001
 # Change ownership of app directory
 RUN chown -R nodejs:nodejs /usr/src/app
 
-# Switch to non-root user
-USER nodejs
+# Switch to non-root user (commented out to avoid volume permission issues with LocalAuth)
+# USER nodejs
 
 # Start the application
 CMD ["npm", "start"]

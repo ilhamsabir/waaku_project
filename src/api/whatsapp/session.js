@@ -100,6 +100,12 @@ function createSession(id) {
 	const client = new Client({
 		authStrategy: new LocalAuth({ clientId: id }),
 		puppeteer: buildPuppeteerOptions(),
+		/*
+		webVersionCache: {
+			type: 'remote',
+			remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.3000.1036673976-alpha.html'
+		}
+		*/
 	})
 
 	client.on('qr', (qr) => {

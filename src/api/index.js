@@ -2,6 +2,7 @@ require('dotenv').config()
 const express = require('express')
 const http = require('http')
 const path = require('path')
+const fs = require('fs')
 const cors = require('cors')
 const cookieParser = require('cookie-parser')
 const bcrypt = require('bcryptjs')
@@ -95,7 +96,12 @@ app.use(express.static(frontendDir, { maxAge: '1h', index: false }))
 // SPA fallback: send index.html for non-API routes
 // Exclude socket.io, api-docs, and health endpoints
 app.get(/^\/(?!api|api-docs|health|socket\.io).*/, (req, res) => {
-	res.sendFile(path.join(frontendDir, 'index.html'))
+	const indexPath = path.join(frontendDir, 'index.html')
+	if (fs.existsSync(indexPath)) {
+		res.sendFile(indexPath)
+	} else {
+		res.status(404).send('Frontend not built. Please run "npm run build" first.')
+	}
 })
 
 // Initialize Socket.IO and export via socket singleton
