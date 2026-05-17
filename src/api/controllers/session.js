@@ -141,15 +141,55 @@ async function getChatMessagesHandler(req, res) {
 		if (!chat) return res.status(404).json({ error: 'Chat not found' })
 		
 		const messages = await chat.fetchMessages({ limit: 50 })
-		const mappedMessages = messages.map(msg => ({
-			id: msg.id._serialized,
-			body: msg.body,
-			timestamp: msg.timestamp,
-			from: msg.from,
-			to: msg.to,
-			fromMe: msg.fromMe,
-			hasMedia: msg.hasMedia,
-			type: msg.type,
+		
+		try {
+			await chat.sendSeen();
+		} catch (seenErr) {
+			console.error('[sendSeen] failed to send seen:', seenErr.message);
+		}
+
+		const mappedMessages = await Promise.all(messages.map(async msg => {
+			let mediaData = null;
+			let mimeType = null;
+			if (msg.hasMedia && (msg.type === 'image' || msg.type === 'sticker')) {
+				try {
+					const media = await msg.downloadMedia();
+					if (media) {
+						mediaData = media.data; // Base64 representation
+						mimeType = media.mimetype; // e.g. "image/jpeg"
+					}
+				} catch (e) {
+					console.error('[media] failed to download media:', e.message);
+				}
+			}
+
+			let body = msg.body;
+			if (msg.type === 'location') {
+				const loc = msg.location;
+				if (loc) {
+					const lat = loc.latitude;
+					const lng = loc.longitude;
+					const desc = loc.description ? ` (${loc.description})` : '';
+					body = `📍 Share Location${desc}:\nhttps://maps.google.com/?q=${lat},${lng}`;
+				} else if (msg.body && msg.body.includes(',')) {
+					body = `📍 Share Location:\nhttps://maps.google.com/?q=${msg.body}`;
+				} else {
+					body = `📍 Share Location`;
+				}
+			}
+
+			return {
+				id: msg.id._serialized,
+				body: body,
+				timestamp: msg.timestamp,
+				from: msg.from,
+				to: msg.to,
+				fromMe: msg.fromMe,
+				hasMedia: msg.hasMedia,
+				type: msg.type,
+				mediaData,
+				mimeType,
+			};
 		}))
 		res.json(mappedMessages)
 	} catch (err) {

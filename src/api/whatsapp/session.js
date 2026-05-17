@@ -4,7 +4,8 @@ const { getIO } = require('../socket')
 const axios = require('axios')
 
 // Environment-aware Puppeteer runtime selection
-const RUNTIME = process.env.WAAKU_RUNTIME || 'linux' // 'linux' (default) | 'mac'
+// Auto-detect Linux (Docker/VPS) to override macOS local settings in .env
+const RUNTIME = process.platform === 'linux' ? 'linux' : (process.env.WAAKU_RUNTIME || 'mac')
 const isLinux = RUNTIME === 'linux'
 const isMac = RUNTIME === 'mac'
 
