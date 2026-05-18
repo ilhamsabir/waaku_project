@@ -98,6 +98,30 @@ async function sendWebhook(eventType, data) {
 function createSession(id) {
 	if (sessions[id]) return sessions[id]
 
+	// Clean up any stale Chromium locks to prevent "profile appears to be in use" errors
+	const fs = require('fs')
+	const path = require('path')
+	const sessionPath = path.join(process.cwd(), '.wwebjs_auth', `session-${id}`)
+	const lockPath = path.join(sessionPath, 'SingletonLock')
+	const defaultLockPath = path.join(sessionPath, 'Default', 'SingletonLock')
+	
+	if (fs.existsSync(lockPath)) {
+		try {
+			fs.unlinkSync(lockPath)
+			console.log(`[${id}] Removed stale SingletonLock file at ${lockPath}`)
+		} catch (err) {
+			console.error(`[${id}] Failed to remove stale SingletonLock:`, err.message)
+		}
+	}
+	if (fs.existsSync(defaultLockPath)) {
+		try {
+			fs.unlinkSync(defaultLockPath)
+			console.log(`[${id}] Removed stale SingletonLock file at ${defaultLockPath}`)
+		} catch (err) {
+			console.error(`[${id}] Failed to remove stale Default/SingletonLock:`, err.message)
+		}
+	}
+
 	const client = new Client({
 		authStrategy: new LocalAuth({ clientId: id }),
 		puppeteer: buildPuppeteerOptions(),
