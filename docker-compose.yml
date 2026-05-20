@@ -12,10 +12,10 @@ services:
     env_file:
       - .env
     ports:
-      - "4300:4300"
+      - "${PORT:-8080}:${PORT:-8080}"
     environment:
       NODE_ENV: production
-      PORT: 4300
+      PORT: ${PORT:-8080}
       # API key configuration (server expects SHA-512 hash)
       # Set WAAKU_API_KEY to sha512(raw_uuid_key_without_dashes)
       # e.g., WAAKU_API_KEY=ab12... (128 hex chars)
@@ -38,7 +38,7 @@ services:
     networks:
       - waaku-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4300"]
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT:-8080}"]
       interval: 30s
       timeout: 10s
       retries: 3

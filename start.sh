@@ -36,28 +36,29 @@ fi
 case $MODE in
     "start")
     echo "📦 Starting in production mode..."
-    docker-compose up -d
-    echo "✅ Application started at http://localhost:4300"
+    docker compose up -d
+    source .env 2>/dev/null || true
+    echo "✅ Application started at http://localhost:${PORT:-8080}"
         ;;
     "stop")
         echo "⏹️  Stopping application..."
-        docker-compose down
+        docker compose down
         echo "✅ Application stopped"
         ;;
     "restart")
         echo "🔄 Restarting application..."
-        docker-compose restart
+        docker compose restart
         echo "✅ Application restarted"
         ;;
     "logs")
         echo "📋 Showing application logs..."
-    docker-compose logs -f
+    docker compose logs -f
         ;;
     "build")
         echo "🔨 Rebuilding application..."
-        docker-compose down
-        docker-compose build --no-cache
-        docker-compose up -d
+        docker compose down
+        docker compose build --no-cache
+        docker compose up -d
         echo "✅ Application rebuilt and started"
         ;;
     "setup")
@@ -79,7 +80,7 @@ case $MODE in
         ;;
     "clean")
         echo "🧹 Cleaning up..."
-        docker-compose down -v
+        docker compose down -v
         docker system prune -f
         echo "✅ Cleanup completed"
         ;;
