@@ -24,6 +24,8 @@ services:
       VITE_API_KEY: ${VITE_API_KEY}
       WAAKU_API_KEY: ${WAAKU_API_KEY}
       WAAKU_RUNTIME: ${WAAKU_RUNTIME}
+      NODE_EXTRA_CA_CERTS: ${NODE_EXTRA_CA_CERTS}
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
       VITE_API_DEV_PORT: ${VITE_API_DEV_PORT}
       VITE_SOCKET_PORT: ${VITE_SOCKET_PORT}
       PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
@@ -33,6 +35,8 @@ services:
       - whatsapp_sessions:/usr/src/app/.wwebjs_auth
       # Optionally mount logs
       - ./logs:/usr/src/app/logs
+      # Mount SSL certificates from host
+      - /etc/ssl/certs:/etc/ssl/certs:ro
     restart: unless-stopped
     shm_size: '1gb'
     networks:
